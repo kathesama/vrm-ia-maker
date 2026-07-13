@@ -15,8 +15,18 @@ jobs:
   diagnose:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out baseline
+      - name: Check out diagnostic branch
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Capture clean tracked baseline
+        run: |
+          mkdir -p diagnostics
+          git fetch origin development --depth=1
+          git ls-tree -r --name-only origin/development > diagnostics/tracked-files.txt
+          git archive --format=tar.gz --output=diagnostics/tracked-source.tar.gz origin/development
+          git rev-parse origin/development > diagnostics/baseline-commit.txt
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -29,7 +39,6 @@ jobs:
 
       - name: Capture diagnostics
         run: |
-          mkdir -p diagnostics
           set +e
 
           ruff check src/ tests/ --output-format=json > diagnostics/ruff.json
@@ -70,6 +79,7 @@ jobs:
               return values[-lines:]
 
           summary = {
+              "baseline_commit": text("baseline-commit.txt").strip(),
               "python": "3.11",
               "ruff": {
                   "exit_code": exit_code("ruff-exit-code.txt"),
@@ -97,14 +107,6 @@ jobs:
           print(json.dumps(summary, indent=2, sort_keys=True))
           PY
 
-          find . -type f \
-            -not -path './.git/*' \
-            -not -path './.pytest_cache/*' \
-            -not -path './.mypy_cache/*' \
-            -not -path './.ruff_cache/*' \
-            -not -path './*.egg-info/*' \
-            | sort > diagnostics/repository-files.txt
-
           exit 0
 
       - name: Upload diagnostic evidence
@@ -112,24 +114,5 @@ jobs:
         with:
           name: baseline-diagnostics
           path: diagnostics/
-          if-no-files-found: error
-          retention-days: 7
-
-      - name: Upload source snapshot
-        uses: actions/upload-artifact@v4
-        with:
-          name: baseline-source-snapshot
-          path: |
-            src/
-            tests/
-            config/
-            data/
-            examples/
-            tools/
-            docs/
-            README.md
-            pyproject.toml
-            LICENSE
-            .github/workflows/ci.yml
           if-no-files-found: error
           retention-days: 7
