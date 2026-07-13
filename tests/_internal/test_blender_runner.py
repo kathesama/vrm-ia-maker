@@ -6,6 +6,7 @@ _PLATFORM_HINTS constant when the config key is absent.
 
 No Blender process is launched — all tests mock filesystem presence checks.
 """
+
 from __future__ import annotations
 
 import sys
@@ -16,8 +17,8 @@ from unittest.mock import patch
 import pytest
 
 from seidr_smidja._internal.blender_runner import (
-    BlenderNotFoundError,
     _PLATFORM_HINTS,
+    BlenderNotFoundError,
     resolve_blender_executable,
 )
 
@@ -53,9 +54,7 @@ class TestResolveBlenderExecutableConfigHints:
 
         assert result == fake_blender
 
-    def test_falls_back_to_deprecated_constant_when_config_key_absent(
-        self, tmp_path: Path
-    ) -> None:
+    def test_falls_back_to_deprecated_constant_when_config_key_absent(self, tmp_path: Path) -> None:
         """When config has no blender.platform_hints key, the _PLATFORM_HINTS
         constant is used as a fallback (deprecated but still present in v0.1)."""
         # We need a path from _PLATFORM_HINTS that we can fake as existing.
@@ -105,9 +104,9 @@ class TestResolveBlenderExecutableConfigHints:
             patch.dict("os.environ", {}, clear=True),
             patch("shutil.which", return_value=None),
             patch("pathlib.Path.is_file", return_value=False),
+            pytest.raises(BlenderNotFoundError),
         ):
-            with pytest.raises(BlenderNotFoundError):
-                resolve_blender_executable(config=config)
+            resolve_blender_executable(config=config)
 
     def test_no_config_no_hints_raises_not_found(self) -> None:
         """When config is None and no platform hints exist for the current platform,
@@ -116,9 +115,9 @@ class TestResolveBlenderExecutableConfigHints:
             patch.dict("os.environ", {}, clear=True),
             patch("shutil.which", return_value=None),
             patch("pathlib.Path.is_file", return_value=False),
+            pytest.raises(BlenderNotFoundError),
         ):
-            with pytest.raises(BlenderNotFoundError):
-                resolve_blender_executable(config=None)
+            resolve_blender_executable(config=None)
 
     def test_env_var_takes_precedence_over_config_hints(self, tmp_path: Path) -> None:
         """SEIDR_BLENDER_PATH env var always wins over config platform hints."""
