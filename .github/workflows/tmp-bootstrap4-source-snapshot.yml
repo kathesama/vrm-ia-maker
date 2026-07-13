@@ -1,0 +1,45 @@
+name: Temporary BOOTSTRAP-4 source snapshot
+
+on:
+  push:
+    branches:
+      - tmp-bootstrap4-source-snapshot
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Create tracked-source archive
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+
+          root = Path.cwd()
+          archive = root / "vrm-ia-maker-source.zip"
+          excluded_parts = {".git", ".pytest_cache", "__pycache__"}
+
+          with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as output:
+              for path in sorted(root.rglob("*")):
+                  if path == archive or not path.is_file():
+                      continue
+                  relative = path.relative_to(root)
+                  if any(part in excluded_parts for part in relative.parts):
+                      continue
+                  output.write(path, relative.as_posix())
+          PY
+
+      - name: Upload source archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap4-source-snapshot
+          path: vrm-ia-maker-source.zip
+          retention-days: 1
