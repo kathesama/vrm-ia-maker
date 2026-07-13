@@ -3,6 +3,7 @@
 These tests mock run_blender so they run in any environment.
 Target: lift forge/runner.py above 28%, oracle_eye/eye.py above 36%.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -19,13 +20,16 @@ class TestForgeRunnerNonBlender:
 
     def _make_spec(self, avatar_id: str = "forge_test") -> Any:
         from seidr_smidja.loom.schema import AvatarSpec
-        return AvatarSpec.model_validate({
-            "spec_version": "1.0",
-            "avatar_id": avatar_id,
-            "display_name": "Forge Test",
-            "base_asset_id": "vroid/sample_a",
-            "metadata": {"author": "Test", "license": "CC0-1.0"},
-        })
+
+        return AvatarSpec.model_validate(
+            {
+                "spec_version": "1.0",
+                "avatar_id": avatar_id,
+                "display_name": "Forge Test",
+                "base_asset_id": "vroid/sample_a",
+                "metadata": {"author": "Test", "license": "CC0-1.0"},
+            }
+        )
 
     def test_build_raises_when_base_asset_missing(self, tmp_path: Path) -> None:
         from seidr_smidja.forge.exceptions import ForgeBuildError
@@ -165,10 +169,13 @@ class TestForgeRunnerNonBlender:
         base_asset = tmp_path / "base.vrm"
         base_asset.write_bytes(b"\x00" * 16)
 
-        with patch(
-            "seidr_smidja.forge.runner.run_blender",
-            side_effect=BlenderNotFoundError("blender not found", []),
-        ), pytest.raises(ForgeBuildError, match="Blender not found"):
+        with (
+            patch(
+                "seidr_smidja.forge.runner.run_blender",
+                side_effect=BlenderNotFoundError("blender not found", []),
+            ),
+            pytest.raises(ForgeBuildError, match="Blender not found"),
+        ):
             build(spec, base_asset, tmp_path / "output")
 
 
@@ -196,16 +203,18 @@ class TestOracleEyeNonBlender:
 
         def mock_run_blender(script_path, args, **kwargs):
             output_dir.mkdir(parents=True, exist_ok=True)
-            # Create fake PNG files for each view
-            for i in range(8):
-                (output_dir / f"render_{i}.png").write_bytes(b"\x00" * 16)
+            from seidr_smidja.oracle_eye.eye import STANDARD_VIEWS
+
+            for view in STANDARD_VIEWS:
+                (output_dir / f"{view.value}.png").write_bytes(b"\x00" * 16)
             return RunnerResult(returncode=0, stdout="render ok", stderr="", duration_seconds=0.2)
 
         with patch("seidr_smidja.oracle_eye.eye.run_blender", side_effect=mock_run_blender):
             result = render(vrm_path, output_dir)
 
         assert isinstance(result, RenderResult)
-        assert result.errors == [] or isinstance(result.errors, list)
+        assert result.success is True
+        assert result.errors == []
 
     def test_render_returns_failure_result_on_nonzero_exit(self, tmp_path: Path) -> None:
         """Blender exit code != 0 produces a RenderResult with success=False (D-006)."""
@@ -235,10 +244,13 @@ class TestOracleEyeNonBlender:
         vrm_path = tmp_path / "test.vrm"
         vrm_path.write_bytes(b"\x00" * 16)
 
-        with patch(
-            "seidr_smidja.oracle_eye.eye.run_blender",
-            side_effect=BlenderNotFoundError("not found", []),
-        ), pytest.raises(RenderError):
+        with (
+            patch(
+                "seidr_smidja.oracle_eye.eye.run_blender",
+                side_effect=BlenderNotFoundError("not found", []),
+            ),
+            pytest.raises(RenderError),
+        ):
             render(vrm_path, tmp_path / "output")
 
     def test_list_standard_views_returns_all_views(self) -> None:
