@@ -56,23 +56,35 @@ reverted without touching Forge behavior.
 
 ## Phase 2 — Characterize Retained Seams
 
-### Work
+This phase is deliberately split so subprocess hardening is not mixed with asset
+integrity, binary parsing, and CLI compatibility work.
 
-Add or preserve focused tests for:
+### Phase 2A — Blender execution seams
 
-- Blender executable resolution and precedence;
-- subprocess timeout and process-group termination;
-- stdout/stderr streaming and result capture;
-- Hoard path containment and checksum validation;
-- VRM reader behavior for 0.x and 1.0 fixtures;
-- Forge temp-file cleanup and arguments;
-- Oracle Eye standard views and failure semantics;
-- selected CLI JSON and exit behavior.
+Status: implemented in the current migration slice.
+
+- characterize Blender executable resolution and precedence;
+- enforce bounded subprocess execution and process-tree termination;
+- drain stdout and stderr concurrently;
+- preserve partial output and callback behavior;
+- characterize Forge temporary files, arguments, outputs, and error wrapping;
+- characterize preview render views and soft-failure semantics;
+- document retained, hardened, temporary, and removal-bound contracts in
+  `RETAINED_SEAM_CONTRACTS.md`.
+
+### Phase 2B — Asset, VRM, and selected CLI seams
+
+Status: pending.
+
+- characterize Hoard path containment and checksum validation;
+- verify cached assets against pinned checksums;
+- characterize VRM reader behavior for 0.x and 1.0 fixtures;
+- characterize selected CLI JSON and exit behavior.
 
 ### Exit gate
 
 Every `RETAIN` or `ADAPT` component has explicit behavior-to-preserve evidence
-(`WELC-01`).
+(`WELC-01` ) before it moves or receives a replacement.
 
 ## Phase 3 — Introduce The New Namespace And Ports
 
@@ -166,7 +178,7 @@ base fixture.
 ### Work
 
 1. move the shared Blender runner;
-2. adapt Forge runner to `CompiledCharacterSpec`;
+2. adapt Forge runner to `CompiledCharacterSpe`;
 3. split generic VRM setup/export from adapter operations;
 4. adapt the renderer and standard views;
 5. adapt the VRM reader and compliance reports;
