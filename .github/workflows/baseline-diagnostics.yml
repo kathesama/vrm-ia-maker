@@ -27,38 +27,82 @@ jobs:
       - name: Install package and development dependencies
         run: pip install -e ".[dev]"
 
-      - name: Ruff baseline
-        continue-on-error: true
+      - name: Capture diagnostics
         run: |
+          mkdir -p diagnostics
           set +e
-          ruff check src/ tests/ --output-format=concise
-          code=$?
-          echo "RUFF_EXIT_CODE=$code"
+
+          ruff check src/ tests/ --output-format=json > diagnostics/ruff.json
+          echo "$?" > diagnostics/ruff-exit-code.txt
+
+          mypy src/seidr_smidja/ --show-error-codes --no-color-output \
+            > diagnostics/mypy.txt 2>&1
+          echo "$?" > diagnostics/mypy-exit-code.txt
+
+          pytest --collect-only -q \
+            -m "not requires_blender and not requires_vroid_host" \
+            > diagnostics/pytest-collect.txt 2>&1
+          echo "$?" > diagnostics/pytest-collect-exit-code.txt
+
+          pytest --tb=short -q \
+            -m "not requires_blender and not requires_vroid_host" \
+            > diagnostics/pytest.txt 2>&1
+          echo "$?" > diagnostics/pytest-exit-code.txt
+
+          python - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+
+          root = Path("diagnostics")
+          findings = json.loads((root / "ruff.json").read_text(encoding="utf-8"))
+          by_code = Counter(item.get("code") or "UNKNOWN" for item in findings)
+          fixable = sum(1 for item in findings if item.get("fix"))
+
+          def text(name: str) -> str:
+              return (root / name).read_text(encoding="utf-8", errors="replace")
+
+          def exit_code(name: str) -> int:
+              return int(text(name).strip())
+
+          def tail(name: str, lines: int = 8) -> list[str]:
+              values = [line for line in text(name).splitlines() if line.strip()]
+              return values[-lines:]
+
+          summary = {
+              "python": "3.11",
+              "ruff": {
+                  "exit_code": exit_code("ruff-exit-code.txt"),
+                  "total": len(findings),
+                  "fixable": fixable,
+                  "by_code": dict(sorted(by_code.items())),
+              },
+              "mypy": {
+                  "exit_code": exit_code("mypy-exit-code.txt"),
+                  "tail": tail("mypy.txt"),
+              },
+              "pytest_collection": {
+                  "exit_code": exit_code("pytest-collect-exit-code.txt"),
+                  "tail": tail("pytest-collect.txt"),
+              },
+              "pytest": {
+                  "exit_code": exit_code("pytest-exit-code.txt"),
+                  "tail": tail("pytest.txt"),
+              },
+          }
+          (root / "summary.json").write_text(
+              json.dumps(summary, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(summary, indent=2, sort_keys=True))
+          PY
+
           exit 0
 
-      - name: Mypy baseline
-        continue-on-error: true
-        run: |
-          set +e
-          mypy src/seidr_smidja/
-          code=$?
-          echo "MYPY_EXIT_CODE=$code"
-          exit 0
-
-      - name: Pytest collection baseline
-        continue-on-error: true
-        run: |
-          set +e
-          pytest --collect-only -q -m "not requires_blender and not requires_vroid_host"
-          code=$?
-          echo "PYTEST_COLLECTION_EXIT_CODE=$code"
-          exit 0
-
-      - name: Pytest execution baseline
-        continue-on-error: true
-        run: |
-          set +e
-          pytest --tb=short -q -m "not requires_blender and not requires_vroid_host"
-          code=$?
-          echo "PYTEST_EXIT_CODE=$code"
-          exit 0
+      - name: Upload diagnostic evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseline-diagnostics
+          path: diagnostics/
+          if-no-files-found: error
+          retention-days: 7
