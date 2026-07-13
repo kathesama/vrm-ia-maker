@@ -25,6 +25,12 @@ a validated VRM 1.0 avatar for deterministic use from Three.js.
   before implementation.
 - Use TDD and Conventional Commits. Keep PRs focused.
 
+## Repository Language Policy
+
+All new or modified comments, docstrings, tests, logs, exception messages,
+documentation, commit messages, pull request content, and review comments must be
+written in English. Do not translate untouched legacy text solely for consistency.
+
 ## Local Setup
 
 ```sh
