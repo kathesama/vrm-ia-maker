@@ -1,0 +1,20 @@
+* text=auto
+
+# Keep repository automation portable across Windows and Unix runners.
+*.sh text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+.gitmodules text eol=lf
+
+# Binary design and avatar assets must never receive line-ending conversion.
+*.blend binary
+*.fbx binary
+*.glb binary
+*.gltf binary
+*.vrm binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary

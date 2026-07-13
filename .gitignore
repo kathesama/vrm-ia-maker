@@ -70,6 +70,12 @@ config/user.yaml
 .env.*
 !.env.example
 
+# SDD local ticket evidence and generated skill exposures
+.ai-specs/changes/
+.agents/skills/
+.claude/skills/
+.cursor/skills/
+
 # OS
 .DS_Store
 Thumbs.db

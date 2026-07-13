@@ -1,0 +1,3 @@
+[submodule ".sdd-kit"]
+	path = .sdd-kit
+	url = https://github.com/kathesama/kathy-sdd-kit
