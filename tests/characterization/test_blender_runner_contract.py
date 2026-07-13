@@ -350,6 +350,7 @@ class TestSubprocessContract:
     def test_windows_launch_uses_a_new_process_group(self, dummy_script: Path) -> None:
         process = _completed_mock_process()
         windows_flag = 0x00000200
+        windows_executable = Path("blender.exe")
         with (
             patch.object(blender_runner.os, "name", "nt"),
             patch.object(
@@ -359,7 +360,9 @@ class TestSubprocessContract:
                 create=True,
             ),
             patch.object(
-                blender_runner, "resolve_blender_executable", return_value=Path("blender.exe")
+                blender_runner,
+                "resolve_blender_executable",
+                return_value=windows_executable,
             ),
             patch("subprocess.Popen", return_value=process) as popen,
         ):
