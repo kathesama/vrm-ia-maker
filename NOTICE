@@ -1,11 +1,13 @@
+VRM IA Maker
+Copyright (c) 2026 Kathy (kathesama)
+
+This project contains software derived from Seiðr-Smiðja.
+
+Original work:
 Seiðr-Smiðja
-
 Copyright (c) 2026 Volmarr Wyrd
+Project home: https://github.com/hrabanazviking/Seidr-Smidja
+Imported baseline: 16cda2e7e65d383c0022b52b461aa2d86b07ee33
 
-Licensed under the Apache License, Version 2.0.
-See the LICENSE file in this repository or visit:
-http://www.apache.org/licenses/LICENSE-2.0
-
-Project home:
-https://github.com/hrabanazviking/Seidr-Smidja
-
+The original work and this derivative project are distributed under the
+Apache License, Version 2.0. See the LICENSE file in this repository.

@@ -6,15 +6,55 @@ on:
   pull_request:
     branches: [main, development]
 
+permissions:
+  contents: read
+
 jobs:
+  lint:
+    name: Ruff inherited baseline
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install package with development dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Run Ruff
+        run: ruff check src/ tests/
+
+  typecheck:
+    name: mypy inherited baseline
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install package with development dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Run mypy
+        run: mypy src/seidr_smidja/
+
   test:
-    name: Test (Python ${{ matrix.python-version }})
+    name: pytest Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12"]
-
     steps:
       - uses: actions/checkout@v4
 
@@ -24,22 +64,27 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install package with dev dependencies
+      - name: Install package with development dependencies
         run: pip install -e ".[dev]"
 
-      - name: Lint with ruff
-        run: ruff check src/ tests/
-
-      - name: Type-check with mypy
-        run: mypy src/seidr_smidja/
-        # Blender scripts import bpy which is not available outside Blender.
-        # They are excluded from mypy checks.
-        continue-on-error: true   # Mypy may flag bpy stubs — treat as informational
-
-      - name: Run tests (non-Blender)
-        # pyproject.toml already sets addopts = "-m 'not requires_blender'"
+      - name: Run non-Blender functional tests
         run: pytest --tb=short -q
 
-      - name: Run tests with coverage
+  coverage:
+    name: Coverage inherited baseline
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install package with development dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Run coverage report
         run: pytest --tb=short -q --cov=seidr_smidja --cov-report=term-missing
-        continue-on-error: true   # Coverage report is informational, not a gate

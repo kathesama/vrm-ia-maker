@@ -1,16 +1,7 @@
-"""
-Seiðr-Smiðja — the Seething-Forge.
+"""Legacy implementation namespace retained during the VRM IA Maker migration.
 
-An agent-only VRM avatar smithy. AI agents design, build, render, critique,
-and export VRChat-ready and VTube-Studio-ready VRM avatars through any Bridge
-(MCP, CLI, REST, skill manifests) with a built-in vision feedback loop.
-
-Domain structure:
-    loom/       — Norn-Loom: parametric avatar specification
-    hoard/      — Asset Hoard: base mesh and asset library
-    forge/      — Smiðja: headless Blender execution
-    oracle_eye/ — Óðins-Auga: render and vision feedback
-    gate/       — Compliance Gate: VRChat and VTube Studio validation
-    annall/     — The Record: logging and session memory
-    bridges/    — Bifröst Bridges: agent-facing interface layer
+The public distribution is ``vrm-ia-maker``. The ``seidr_smidja`` namespace
+currently contains inherited specification, asset, Blender, rendering, validation,
+and interface code that will be moved behind the new architecture in controlled
+phases.
 """
