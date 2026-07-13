@@ -97,6 +97,14 @@ jobs:
           print(json.dumps(summary, indent=2, sort_keys=True))
           PY
 
+          find . -type f \
+            -not -path './.git/*' \
+            -not -path './.pytest_cache/*' \
+            -not -path './.mypy_cache/*' \
+            -not -path './.ruff_cache/*' \
+            -not -path './*.egg-info/*' \
+            | sort > diagnostics/repository-files.txt
+
           exit 0
 
       - name: Upload diagnostic evidence
@@ -104,5 +112,24 @@ jobs:
         with:
           name: baseline-diagnostics
           path: diagnostics/
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload source snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseline-source-snapshot
+          path: |
+            src/
+            tests/
+            config/
+            data/
+            examples/
+            tools/
+            docs/
+            README.md
+            pyproject.toml
+            LICENSE
+            .github/workflows/ci.yml
           if-no-files-found: error
           retention-days: 7
