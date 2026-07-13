@@ -1,0 +1,61 @@
+name: Baseline diagnostics
+
+on:
+  push:
+    branches:
+      - tmp-check-issues
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out baseline
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install package and development dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Ruff baseline
+        continue-on-error: true
+        run: |
+          set +e
+          ruff check src/ tests/ --output-format=concise
+          code=$?
+          echo "RUFF_EXIT_CODE=$code"
+          exit 0
+
+      - name: Mypy baseline
+        continue-on-error: true
+        run: |
+          set +e
+          mypy src/seidr_smidja/
+          code=$?
+          echo "MYPY_EXIT_CODE=$code"
+          exit 0
+
+      - name: Pytest collection baseline
+        continue-on-error: true
+        run: |
+          set +e
+          pytest --collect-only -q -m "not requires_blender and not requires_vroid_host"
+          code=$?
+          echo "PYTEST_COLLECTION_EXIT_CODE=$code"
+          exit 0
+
+      - name: Pytest execution baseline
+        continue-on-error: true
+        run: |
+          set +e
+          pytest --tb=short -q -m "not requires_blender and not requires_vroid_host"
+          code=$?
+          echo "PYTEST_EXIT_CODE=$code"
+          exit 0
