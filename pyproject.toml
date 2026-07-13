@@ -3,32 +3,57 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "seidr-smidja"
+name = "vrm-ia-maker"
 version = "0.1.0.dev0"
-description = "An agent-only VRM avatar smithy — a headless programmatic forge for AI agents."
+description = "Build-time CLI for compiling character design packages into validated VRM avatars for Three.js."
 readme = "README.md"
-requires-python = ">=3.10"
-license = { text = "MIT" }
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
 authors = [
-    { name = "Volmarr Wyrd", email = "volmarrwyrd@gmail.com" },
+    { name = "Kathy (kathesama)" },
 ]
-keywords = ["vrm", "avatar", "blender", "mcp", "ai-agent", "vtuber", "vrchat"]
+maintainers = [
+    { name = "Kathy (kathesama)" },
+]
+keywords = [
+    "vrm",
+    "avatar",
+    "blender",
+    "threejs",
+    "character-design",
+    "cli",
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Graphics :: 3D Modeling",
+]
 
 dependencies = [
-    # Spec layer (Loom)
+    # Specification layer.
     "pydantic>=2.0",
     "pyyaml>=6.0",
-    # CLI Bridge (Rúnstafr)
+    # Legacy CLI retained during migration.
     "click>=8.1",
-    # REST Bridge (Straumur)
+    # Legacy REST bridge. This dependency will become optional before removal.
     "fastapi>=0.110",
     "uvicorn[standard]>=0.29",
-    # MCP Bridge (Mjöll)
+    # Legacy MCP bridge. This dependency will become optional before removal.
     "mcp>=1.0",
-    # Brúarhönd — Hengilherðir client (forge-side; no GUI deps required here)
-    # D-010: promoted from [dev] to base so the client is always available.
+    # Legacy Brúarhönd client dependency retained until the lateral feature is removed.
     "httpx>=0.27",
 ]
+
+[project.urls]
+Homepage = "https://github.com/kathesama/vrm-ia-maker"
+Repository = "https://github.com/kathesama/vrm-ia-maker"
+Documentation = "https://github.com/kathesama/vrm-ia-maker/tree/development/docs"
+Upstream = "https://github.com/hrabanazviking/Seidr-Smidja"
 
 [project.optional-dependencies]
 dev = [
@@ -37,33 +62,29 @@ dev = [
     "pytest-cov>=5.0",
     "ruff>=0.4",
     "mypy>=1.10",
-    "respx>=0.21",  # httpx mocking for Brúarhönd client tests
+    "respx>=0.21",
 ]
-# Brúarhönd — daemon-side GUI automation dependencies.
-# Install on the VRoid Studio host machine, not the forge.
+# Legacy Brúarhönd daemon-side GUI automation dependencies.
 brunhand-daemon = [
     "pyautogui>=0.9.54",
     "mss>=9.0.0",
     "pygetwindow>=0.0.9",
 ]
-# Brúarhönd — Windows-only accessibility library (pywinauto).
-# Install on Windows VRoid hosts that require accessibility-tree primitives.
+# Windows-only accessibility support for the legacy Brúarhönd host.
 brunhand-win = [
     "pywinauto>=0.6.8 ; sys_platform == 'win32'",
 ]
-# Brúarhönd — macOS-only accessibility library (pyobjc Quartz framework).
-# Install on macOS VRoid hosts. Requires Accessibility permission grant in System Preferences.
+# macOS-only accessibility support for the legacy Brúarhönd host.
 brunhand-mac = [
     "pyobjc-framework-Quartz>=10.0 ; sys_platform == 'darwin'",
 ]
-# Brúarhönd — Linux-only accessibility library (pyatspi / AT-SPI).
-# Install on Linux VRoid hosts running X11 sessions (Wayland not supported in v0.1).
+# Linux-only accessibility support for the legacy Brúarhönd host.
 brunhand-linux = [
     "pyatspi>=2.38.0 ; sys_platform == 'linux'",
 ]
 
 [project.scripts]
-seidr = "seidr_smidja.bridges.runstafr.cli:main"
+seidr = "seidr_smidja.bridges.runstafr.entrypoint:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
