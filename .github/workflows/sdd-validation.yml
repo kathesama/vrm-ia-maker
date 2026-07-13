@@ -1,0 +1,25 @@
+name: SDD validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - development
+
+permissions:
+  contents: read
+
+jobs:
+  validate-sdd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository and pinned kit
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Initialize local SDD workspace
+        run: sh tools/setup_sdd_workspace.sh
+
+      - name: Validate SDD kit and skill exposures
+        run: sh tools/check_sdd_workspace.sh
