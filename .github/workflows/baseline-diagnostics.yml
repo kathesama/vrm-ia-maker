@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - tmp-check-issues
+  pull_request:
+    branches:
+      - development
 
 permissions:
   contents: read
