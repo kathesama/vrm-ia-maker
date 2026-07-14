@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "pack_id": "modular-spike-pack",
+  "provenance": {
+    "author": "Katherine E. Aguirre / Juana IA",
+    "source": "Repository-owned procedural Blender fixtures",
+    "license": "CC0-1.0",
+    "commercial_use": true,
+    "modification_allowed": true,
+    "redistribution_allowed": true
+  },
+  "base_asset": {
+    "asset_id": "base-body-v1",
+    "path": "assets/base.glb",
+    "object_name": "Armature",
+    "sha256": "GENERATED_AT_BUILD",
+    "byte_length": 0,
+    "required_objects": ["Armature", "Body", "Head", "LeftEyeMesh", "RightEyeMesh"],
+    "required_bones": [
+      "hips", "spine", "chest", "upperChest", "neck", "head",
+      "leftShoulder", "leftUpperArm", "leftLowerArm", "leftHand",
+      "rightShoulder", "rightUpperArm", "rightLowerArm", "rightHand",
+      "leftUpperLeg", "leftLowerLeg", "leftFoot",
+      "rightUpperLeg", "rightLowerLeg", "rightFoot",
+      "L_Eye", "R_Eye", "jaw"
+    ],
+    "required_expressions": [
+      "blink", "blinkLeft", "blinkRight", "aa", "ih", "ou", "ee", "oh",
+      "happy", "sad", "angry", "surprised", "relaxed"
+    ]
+  },
+  "components": [
+    {
+      "asset_id": "hair-v1",
+      "slot": "hair",
+      "kind": "rigid_attachment",
+      "path": "assets/hair.glb",
+      "object_name": "Hair_Rigid",
+      "attachment_bone": "head",
+      "required": true,
+      "material_names": ["Hair_Primary"],
+      "sha256": "GENERATED_AT_BUILD",
+      "byte_length": 0
+    },
+    {
+      "asset_id": "outfit-v1",
+      "slot": "outfit",
+      "kind": "skinned_mesh",
+      "path": "assets/outfit.glb",
+      "object_name": "OutfitMesh",
+      "required": true,
+      "required_bones": ["chest", "upperChest", "leftUpperArm", "rightUpperArm"],
+      "material_names": ["Outfit_Primary"],
+      "sha256": "GENERATED_AT_BUILD",
+      "byte_length": 0
+    },
+    {
+      "asset_id": "accessory-v1",
+      "slot": "accessory",
+      "kind": "rigid_attachment",
+      "path": "assets/accessory.glb",
+      "object_name": "Accessory_Brooch",
+      "attachment_bone": "upperChest",
+      "required": false,
+      "material_names": ["Accessory_Primary"],
+      "sha256": "GENERATED_AT_BUILD",
+      "byte_length": 0
+    }
+  ]
+}

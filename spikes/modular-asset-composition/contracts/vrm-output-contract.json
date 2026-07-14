@@ -1,0 +1,35 @@
+{
+  "contract_version": "1.0",
+  "container": {
+    "format": "glTF Binary",
+    "version": "2.0"
+  },
+  "vrm": {
+    "extension": "VRMC_vrm",
+    "spec_version_prefix": "1."
+  },
+  "required_humanoid_bones": [
+    "hips",
+    "spine",
+    "chest",
+    "neck",
+    "head",
+    "leftUpperArm",
+    "leftLowerArm",
+    "leftHand",
+    "rightUpperArm",
+    "rightLowerArm",
+    "rightHand",
+    "leftUpperLeg",
+    "leftLowerLeg",
+    "leftFoot",
+    "rightUpperLeg",
+    "rightLowerLeg",
+    "rightFoot"
+  ],
+  "required_expressions": ["blink", "aa", "ih", "ou", "ee", "oh"],
+  "requires_expression_manager": true,
+  "requires_look_at": true,
+  "requires_single_armature": true,
+  "requires_shared_skin_for_body_and_outfit": true
+}

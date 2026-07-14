@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/kathesama/vrm-ia-maker/schemas/asset-pack-manifest-v1.json",
+  "title": "AssetPackManifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "pack_id", "provenance", "base_asset", "components"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "pack_id": {"type": "string", "minLength": 1},
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "base_asset": {"$ref": "#/$defs/baseAsset"},
+    "components": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/component"},
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["author", "source", "license", "commercial_use", "modification_allowed", "redistribution_allowed"],
+      "properties": {
+        "author": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1},
+        "license": {"type": "string", "minLength": 1},
+        "commercial_use": {"type": "boolean"},
+        "modification_allowed": {"type": "boolean"},
+        "redistribution_allowed": {"type": "boolean"}
+      }
+    },
+    "assetCommon": {
+      "type": "object",
+      "required": ["asset_id", "path", "object_name", "sha256", "byte_length"],
+      "properties": {
+        "asset_id": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1},
+        "object_name": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "byte_length": {"type": "integer", "minimum": 1}
+      }
+    },
+    "baseAsset": {
+      "allOf": [
+        {"$ref": "#/$defs/assetCommon"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["asset_id", "path", "object_name", "sha256", "byte_length", "required_objects", "required_bones", "required_expressions"],
+          "properties": {
+            "asset_id": {"type": "string"},
+            "path": {"type": "string"},
+            "object_name": {"type": "string"},
+            "sha256": {"type": "string"},
+            "byte_length": {"type": "integer"},
+            "required_objects": {"type": "array", "items": {"type": "string"}},
+            "required_bones": {"type": "array", "items": {"type": "string"}},
+            "required_expressions": {"type": "array", "items": {"type": "string"}}
+          }
+        }
+      ]
+    },
+    "component": {
+      "allOf": [
+        {"$ref": "#/$defs/assetCommon"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["asset_id", "slot", "kind", "path", "object_name", "sha256", "byte_length", "required"],
+          "properties": {
+            "asset_id": {"type": "string"},
+            "slot": {"type": "string", "enum": ["hair", "outfit", "accessory"]},
+            "kind": {"type": "string", "enum": ["rigid_attachment", "skinned_mesh"]},
+            "path": {"type": "string"},
+            "object_name": {"type": "string"},
+            "sha256": {"type": "string"},
+            "byte_length": {"type": "integer"},
+            "required": {"type": "boolean"},
+            "attachment_bone": {"type": "string"},
+            "required_bones": {"type": "array", "items": {"type": "string"}},
+            "material_names": {"type": "array", "items": {"type": "string"}}
+          }
+        }
+      ]
+    }
+  }
+}

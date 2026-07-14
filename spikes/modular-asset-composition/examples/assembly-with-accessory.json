@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "character_id": "modular-spike-with-accessory",
+  "display_name": "Modular Spike With Accessory",
+  "asset_pack_id": "modular-spike-pack",
+  "selections": [
+    {"slot": "hair", "asset_id": "hair-v1", "enabled": true},
+    {"slot": "outfit", "asset_id": "outfit-v1", "enabled": true},
+    {"slot": "accessory", "asset_id": "accessory-v1", "enabled": true}
+  ],
+  "material_overrides": {
+    "Hair_Primary": "#2B1D26",
+    "Outfit_Primary": "#171A26",
+    "Accessory_Primary": "#4D9DB8"
+  },
+  "required_expressions": ["blink", "aa", "ih", "ou", "ee", "oh"],
+  "metadata": {
+    "author": "Katherine E. Aguirre / Juana IA",
+    "license": "CC0",
+    "commercial_use": true,
+    "redistribution": true,
+    "contact_url": "https://github.com/kathesama/vrm-ia-maker"
+  }
+}

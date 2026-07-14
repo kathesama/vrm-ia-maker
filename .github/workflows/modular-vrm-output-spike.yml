@@ -1,0 +1,228 @@
+name: Modular VRM output spike
+
+on:
+  push:
+    branches:
+      - spike-modular-asset-composition
+  pull_request:
+    branches:
+      - development
+    paths:
+      - ".github/workflows/modular-vrm-output-spike.yml"
+      - "spikes/modular-asset-composition/**"
+      - "src/seidr_smidja/forge/scripts/build_avatar.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-modular-vrm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      BUILD_DIR: build/modular-spike
+      BLENDER_ARCHIVE: blender-4.2.0-linux-x64.tar.xz
+      BLENDER_DIRECTORY: blender-4.2.0-linux-x64
+      VRM_ADDON_URL: https://github.com/saturday06/VRM-Addon-for-Blender/releases/download/v4.4.0/VRM_Addon_for_Blender-4_4_0.zip
+      VRM_ADDON_SHA256: 339e2a13b408c9d9d777016857422957a2bc75a5d19a5e70343ae18b33fec748
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Download pinned Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tools "$BUILD_DIR"
+          curl --fail --location --retry 3 \
+            "https://download.blender.org/release/Blender4.2/${BLENDER_ARCHIVE}" \
+            --output "/tmp/${BLENDER_ARCHIVE}"
+          tar --extract --file "/tmp/${BLENDER_ARCHIVE}" --directory .tools
+          blender_path="$GITHUB_WORKSPACE/.tools/${BLENDER_DIRECTORY}/blender"
+          test -x "$blender_path"
+          echo "BLENDER=$blender_path" >> "$GITHUB_ENV"
+          "$blender_path" --version | head -n 2
+
+      - name: Download and verify the pinned VRM Add-on
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 \
+            "$VRM_ADDON_URL" \
+            --output "$BUILD_DIR/vrm-addon.zip"
+          printf '%s  %s\n' "$VRM_ADDON_SHA256" "$BUILD_DIR/vrm-addon.zip" | sha256sum --check
+
+      - name: Install and enable the VRM Add-on
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$BLENDER" --background \
+            --python spikes/hybrid-vrm-output/install_vrm_addon.py \
+            -- "$BUILD_DIR/vrm-addon.zip"
+
+      - name: Generate original modular GLB assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$BLENDER" --background \
+            --python spikes/modular-asset-composition/create_modular_assets.py \
+            -- "$BUILD_DIR/assets"
+          test -s "$BUILD_DIR/assets/base.glb"
+          test -s "$BUILD_DIR/assets/hair.glb"
+          test -s "$BUILD_DIR/assets/outfit.glb"
+          test -s "$BUILD_DIR/assets/accessory.glb"
+
+      - name: Seal asset pack hashes and provenance
+        run: |
+          python spikes/modular-asset-composition/seal_manifests.py \
+            spikes/modular-asset-composition/examples/asset-pack.template.json \
+            "$BUILD_DIR" \
+            "$BUILD_DIR/asset-pack.manifest.json"
+
+      - name: Install Three.js spike dependencies
+        working-directory: spikes/modular-asset-composition/three
+        run: npm install --no-audit --no-fund
+
+      - name: Compile assembly without accessory
+        run: |
+          node spikes/modular-asset-composition/three/compose.mjs \
+            "$BUILD_DIR/asset-pack.manifest.json" \
+            spikes/modular-asset-composition/examples/assembly-without-accessory.json \
+            "$BUILD_DIR/compiled-without-accessory.json" \
+            "$BUILD_DIR/three-inspection-without-accessory.json"
+
+      - name: Compile assembly with accessory
+        run: |
+          node spikes/modular-asset-composition/three/compose.mjs \
+            "$BUILD_DIR/asset-pack.manifest.json" \
+            spikes/modular-asset-composition/examples/assembly-with-accessory.json \
+            "$BUILD_DIR/compiled-with-accessory.json" \
+            "$BUILD_DIR/three-inspection-with-accessory.json"
+
+      - name: Run negative assembly contracts
+        run: |
+          node spikes/modular-asset-composition/three/negative-tests.mjs \
+            "$BUILD_DIR/asset-pack.manifest.json" \
+            spikes/modular-asset-composition/examples/assembly-with-accessory.json
+
+      - name: Finalize VRM without accessory in Blender
+        run: |
+          "$BLENDER" --background \
+            --python spikes/modular-asset-composition/finalize_modular_avatar.py \
+            -- \
+            --spec "$BUILD_DIR/compiled-without-accessory.json" \
+            --output "$BUILD_DIR/modular-without-accessory.vrm" \
+            --report "$BUILD_DIR/blender-report-without-accessory.json" \
+            --build-script src/seidr_smidja/forge/scripts/build_avatar.py
+          test -s "$BUILD_DIR/modular-without-accessory.vrm"
+
+      - name: Finalize VRM with accessory in Blender
+        run: |
+          "$BLENDER" --background \
+            --python spikes/modular-asset-composition/finalize_modular_avatar.py \
+            -- \
+            --spec "$BUILD_DIR/compiled-with-accessory.json" \
+            --output "$BUILD_DIR/modular-with-accessory.vrm" \
+            --report "$BUILD_DIR/blender-report-with-accessory.json" \
+            --build-script src/seidr_smidja/forge/scripts/build_avatar.py
+          test -s "$BUILD_DIR/modular-with-accessory.vrm"
+
+      - name: Validate modular VRM structures
+        run: |
+          python spikes/modular-asset-composition/structural_validate.py \
+            "$BUILD_DIR/modular-without-accessory.vrm" \
+            "$BUILD_DIR/compiled-without-accessory.json" \
+            "$BUILD_DIR/structural-without-accessory.json"
+          python spikes/modular-asset-composition/structural_validate.py \
+            "$BUILD_DIR/modular-with-accessory.vrm" \
+            "$BUILD_DIR/compiled-with-accessory.json" \
+            "$BUILD_DIR/structural-with-accessory.json"
+
+      - name: Validate modular VRMs through Three.js
+        run: |
+          node spikes/modular-asset-composition/three/validate.mjs \
+            "$BUILD_DIR/modular-without-accessory.vrm" \
+            "$BUILD_DIR/compiled-without-accessory.json" \
+            "$BUILD_DIR/threejs-without-accessory.json"
+          node spikes/modular-asset-composition/three/validate.mjs \
+            "$BUILD_DIR/modular-with-accessory.vrm" \
+            "$BUILD_DIR/compiled-with-accessory.json" \
+            "$BUILD_DIR/threejs-with-accessory.json"
+
+      - name: Compare the two assembly outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["BUILD_DIR"])
+          without_accessory = root / "modular-without-accessory.vrm"
+          with_accessory = root / "modular-with-accessory.vrm"
+          first_hash = hashlib.sha256(without_accessory.read_bytes()).hexdigest()
+          second_hash = hashlib.sha256(with_accessory.read_bytes()).hexdigest()
+          if first_hash == second_hash:
+              raise SystemExit("The two assembly manifests produced identical VRM files.")
+          comparison = {
+              "valid": True,
+              "without_accessory_sha256": first_hash,
+              "with_accessory_sha256": second_hash,
+              "outputs_are_distinct": True,
+          }
+          (root / "assembly-comparison.json").write_text(
+              json.dumps(comparison, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Record pinned toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          report = {
+              "blender": subprocess.check_output(
+                  [os.environ["BLENDER"], "--version"], text=True
+              ).splitlines()[0],
+              "vrm_addon": {
+                  "url": os.environ["VRM_ADDON_URL"],
+                  "sha256": os.environ["VRM_ADDON_SHA256"],
+              },
+              "node": subprocess.check_output(["node", "--version"], text=True).strip(),
+              "three": "0.183.2",
+              "three_vrm": "3.5.1",
+          }
+          path = Path(os.environ["BUILD_DIR"]) / "toolchain.json"
+          path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+          PY
+
+      - name: Upload modular VRM evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: modular-vrm-output
+          path: build/modular-spike/
+          if-no-files-found: warn
+          retention-days: 7
