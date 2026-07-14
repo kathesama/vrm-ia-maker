@@ -1,37 +1,29 @@
-"""seidr_smidja._internal.blender_runner — Shared Blender Subprocess Runner
+"""Shared Blender subprocess execution for retained build and render paths.
 
-Decision D-003: This module lives in _internal/ and is the single source of
-truth for Blender subprocess mechanics. Both Forge and Oracle Eye import from
-here — neither owns this logic and neither imports from the other.
-
-The runner knows nothing about WHAT the script does. It provides:
-    - Blender executable path resolution (priority chain per ARCHITECTURE.md §V)
-    - Subprocess launch with timeout, stdout/stderr capture
-    - Optional line-streaming callback for Annáll telemetry
-    - Structured RunnerResult return
-
-Cross-platform: Windows, Linux, macOS — pathlib.Path everywhere.
-Never hardcodes any path. Never uses shell=True unless explicitly necessary.
+This module is the single source of truth for Blender executable discovery,
+subprocess lifecycle management, bounded execution, and output capture. Forge
+and preview rendering depend on this seam but do not own its process mechanics.
 """
+
 from __future__ import annotations
 
+import contextlib
 import logging
 import os
 import shutil
+import signal
 import subprocess
+import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import IO, Any
 
 logger = logging.getLogger(__name__)
 
-# AUDIT-004: Platform-specific well-known Blender locations have been moved to
-# config/defaults.yaml under blender.platform_hints.
-# This constant is kept as a DEPRECATED fallback for one release cycle (v0.1.x)
-# and will be removed in v0.2 once the config-driven path is proven in production.
-# DO NOT add new paths here — extend config/defaults.yaml instead.
+# Platform-specific paths remain a temporary compatibility fallback. New paths
+# belong in config/defaults.yaml under blender.platform_hints.
 _PLATFORM_HINTS: dict[str, list[str]] = {
     "win32": [
         r"C:\Program Files\Blender Foundation\Blender 4.2\blender.exe",
@@ -45,16 +37,15 @@ _PLATFORM_HINTS: dict[str, list[str]] = {
         "/opt/homebrew/bin/blender",
     ],
 }
-# DEPRECATED: The above constant will be removed in v0.2.
-# Prefer blender.platform_hints in config/defaults.yaml or config/user.yaml.
+
+_DEFAULT_TIMEOUT_SECONDS = 300.0
+_TERMINATION_GRACE_SECONDS = 0.5
+_POST_TERMINATION_WAIT_SECONDS = 5.0
+_READER_JOIN_TIMEOUT_SECONDS = 2.0
 
 
 class BlenderNotFoundError(RuntimeError):
-    """Raised when the Blender executable cannot be located.
-
-    Carries a list of all locations that were checked so the operator
-    can diagnose the issue quickly.
-    """
+    """Raised when the Blender executable cannot be located."""
 
     def __init__(self, message: str, locations_checked: list[str]) -> None:
         super().__init__(message)
@@ -63,15 +54,7 @@ class BlenderNotFoundError(RuntimeError):
 
 @dataclass
 class RunnerResult:
-    """Structured result from a Blender subprocess invocation.
-
-    Attributes:
-        returncode:       The subprocess exit code. 0 = success.
-        stdout:           Full captured stdout from the Blender process.
-        stderr:           Full captured stderr from the Blender process.
-        duration_seconds: Wall-clock seconds the process ran.
-        timed_out:        True if the process was killed due to timeout.
-    """
+    """Structured result from a Blender subprocess invocation."""
 
     returncode: int
     stdout: str
@@ -81,75 +64,69 @@ class RunnerResult:
 
 
 def resolve_blender_executable(config: dict[str, Any] | None = None) -> Path:
-    """Resolve the path to the Blender executable.
+    """Resolve Blender using environment, configuration, PATH, then hints.
 
-    Priority chain (first match wins):
-        1. Environment variable SEIDR_BLENDER_PATH (explicit override)
-        2. config["blender"]["executable"] if provided and resolvable
-        3. PATH lookup via shutil.which("blender")
-        4. Platform-specific well-known locations
+    Resolution order is intentionally stable during migration:
 
-    Args:
-        config: Optional config dict from load_config(). Used for step 2.
-
-    Returns:
-        A Path to the Blender executable.
-
-    Raises:
-        BlenderNotFoundError: If no executable can be found at any location.
+    1. ``SEIDR_BLENDER_PATH``
+    2. legacy ``BLENDER_PATH``
+    3. explicit ``blender.executable`` file path
+    4. the ``blender`` command on ``PATH``
+    5. a configured executable name on ``PATH``
+    6. configured platform hints
+    7. deprecated built-in platform hints
     """
+
     checked: list[str] = []
 
-    # Step 1: Environment variable
-    env_path = os.environ.get("SEIDR_BLENDER_PATH") or os.environ.get("BLENDER_PATH")
-    if env_path:
-        p = Path(env_path)
-        checked.append(f"env:SEIDR_BLENDER_PATH={env_path}")
-        if p.is_file():
-            logger.debug("Blender resolved via env var: %s", p)
-            return p
+    for variable_name in ("SEIDR_BLENDER_PATH", "BLENDER_PATH"):
+        value = os.environ.get(variable_name)
+        if not value:
+            continue
+        checked.append(f"env:{variable_name}={value}")
+        candidate = Path(value)
+        if candidate.is_file():
+            logger.debug("Blender resolved through %s: %s", variable_name, candidate)
+            return candidate
 
-    # Step 2: Config dict
-    if config:
-        config_exe = config.get("blender", {}).get("executable")
-        if config_exe and config_exe != "blender":
-            p = Path(config_exe)
-            checked.append(f"config:blender.executable={config_exe}")
-            if p.is_file():
-                logger.debug("Blender resolved via config: %s", p)
-                return p
+    blender_config = (config or {}).get("blender", {})
+    configured_executable = blender_config.get("executable")
+    if configured_executable and configured_executable != "blender":
+        checked.append(f"config:blender.executable={configured_executable}")
+        candidate = Path(configured_executable)
+        if candidate.is_file():
+            logger.debug("Blender resolved through explicit configuration: %s", candidate)
+            return candidate
 
-    # Step 3: PATH lookup
-    which_result = shutil.which("blender")
+    path_candidate = shutil.which("blender")
     checked.append("PATH:blender")
-    if which_result:
-        logger.debug("Blender resolved via PATH: %s", which_result)
-        return Path(which_result)
+    if path_candidate:
+        logger.debug("Blender resolved through PATH: %s", path_candidate)
+        return Path(path_candidate)
 
-    # Also try config value "blender" as a PATH lookup (when config_exe == "blender")
-    if config:
-        config_exe = config.get("blender", {}).get("executable", "blender")
-        if config_exe:
-            which_result = shutil.which(config_exe)
-            checked.append(f"PATH:{config_exe}")
-            if which_result:
-                logger.debug("Blender resolved via config+PATH: %s", which_result)
-                return Path(which_result)
+    configured_command = configured_executable or "blender"
+    if configured_command != "blender":
+        path_candidate = shutil.which(configured_command)
+        checked.append(f"PATH:{configured_command}")
+        if path_candidate:
+            logger.debug(
+                "Blender resolved through configured PATH command %s: %s",
+                configured_command,
+                path_candidate,
+            )
+            return Path(path_candidate)
 
-    # Step 4: Platform-specific hints.
-    # AUDIT-004: Read hints from config/defaults.yaml (blender.platform_hints) first.
-    # Falls back to the _PLATFORM_HINTS constant if the config key is absent.
     import sys
 
-    config_hints: list[str] = []
-    if config:
-        platform_hints_cfg = config.get("blender", {}).get("platform_hints", {})
-        if isinstance(platform_hints_cfg, dict):
-            config_hints = platform_hints_cfg.get(sys.platform, [])
+    configured_hints: list[str] = []
+    platform_hints = blender_config.get("platform_hints", {})
+    if isinstance(platform_hints, dict):
+        raw_hints = platform_hints.get(sys.platform, [])
+        if isinstance(raw_hints, list):
+            configured_hints = [str(hint) for hint in raw_hints]
 
-    # Use config-driven hints if present; otherwise fall back to the deprecated constant.
-    if config_hints:
-        hints = config_hints
+    if configured_hints:
+        hints = configured_hints
         hint_source = "config"
     else:
         hints = _PLATFORM_HINTS.get(sys.platform, [])
@@ -157,17 +134,143 @@ def resolve_blender_executable(config: dict[str, Any] | None = None) -> Path:
 
     for hint in hints:
         checked.append(f"platform-hint({hint_source}):{hint}")
-        p = Path(hint)
-        if p.is_file():
-            logger.debug("Blender resolved via platform hint (%s): %s", hint_source, p)
-            return p
+        candidate = Path(hint)
+        if candidate.is_file():
+            logger.debug(
+                "Blender resolved through platform hint (%s): %s",
+                hint_source,
+                candidate,
+            )
+            return candidate
 
     raise BlenderNotFoundError(
-        "Blender executable not found. "
-        "Set the SEIDR_BLENDER_PATH environment variable to the full path of your "
-        "blender executable, or set blender.executable in config/user.yaml.",
+        "Blender executable not found. Set SEIDR_BLENDER_PATH to the full "
+        "executable path or configure blender.executable in config/user.yaml.",
         locations_checked=checked,
     )
+
+
+def _subprocess_group_options() -> dict[str, Any]:
+    """Return platform-specific options that isolate the Blender process tree."""
+
+    if os.name == "nt":
+        return {
+            "creationflags": getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0),
+        }
+    return {"start_new_session": True}
+
+
+def _drain_stream(
+    stream: IO[str],
+    output: list[str],
+    errors: list[Exception],
+    on_line: Callable[[str], None] | None = None,
+) -> None:
+    """Drain one subprocess stream without allowing callbacks to stop capture."""
+
+    try:
+        for line in stream:
+            normalized = line.rstrip("\n")
+            output.append(normalized)
+            if on_line is not None:
+                try:
+                    on_line(normalized)
+                except Exception:
+                    logger.debug("Blender stdout callback failed", exc_info=True)
+    except Exception as exc:  # pragma: no cover - platform pipe failures are rare
+        errors.append(exc)
+
+
+def _terminate_process_tree(process: subprocess.Popen[str]) -> None:
+    """Terminate the Blender process and descendants using a bounded strategy."""
+
+    if os.name == "nt":
+        if process.poll() is not None:
+            return
+        try:
+            subprocess.run(
+                ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=_POST_TERMINATION_WAIT_SECONDS,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            logger.warning(
+                "Unable to terminate Blender with taskkill; falling back to process.kill()",
+                exc_info=True,
+            )
+        if process.poll() is None:
+            process.kill()
+        return
+
+    # POSIX launches Blender with start_new_session=True, so the process ID is
+    # also the process-group ID. Keep targeting that group even if the leader
+    # exits after the timeout while descendants still hold inherited pipes.
+    process_group_id = process.pid
+    try:
+        os.killpg(process_group_id, signal.SIGTERM)
+    except ProcessLookupError:
+        return
+    except OSError:
+        logger.warning(
+            "Unable to terminate the Blender process group; falling back to process.kill()",
+            exc_info=True,
+        )
+        if process.poll() is None:
+            process.kill()
+        return
+
+    deadline = time.monotonic() + _TERMINATION_GRACE_SECONDS
+    while time.monotonic() < deadline:
+        try:
+            os.killpg(process_group_id, 0)
+        except ProcessLookupError:
+            return
+        except OSError:
+            break
+        time.sleep(0.02)
+
+    try:
+        os.killpg(process_group_id, signal.SIGKILL)
+    except ProcessLookupError:
+        return
+    except OSError:
+        logger.warning(
+            "Unable to force-kill the Blender process group; falling back to process.kill()",
+            exc_info=True,
+        )
+        if process.poll() is None:
+            process.kill()
+
+
+def _close_pipe(pipe: IO[Any] | None) -> None:
+    """Close a subprocess pipe without masking the original execution result."""
+
+    if pipe is None:
+        return
+    with contextlib.suppress(AttributeError, OSError):
+        pipe.close()
+
+
+def _join_reader_threads(
+    readers: list[threading.Thread],
+    process: subprocess.Popen[str],
+) -> None:
+    """Join output readers and close pipes if a platform leaves them blocked."""
+
+    for reader in readers:
+        reader.join(timeout=_READER_JOIN_TIMEOUT_SECONDS)
+
+    blocked = [reader for reader in readers if reader.is_alive()]
+    if not blocked:
+        return
+
+    logger.error("Blender output readers did not stop after process termination; closing pipes")
+    _close_pipe(process.stdout)
+    _close_pipe(process.stderr)
+    for reader in blocked:
+        reader.join(timeout=_READER_JOIN_TIMEOUT_SECONDS)
 
 
 def run_blender(
@@ -177,125 +280,116 @@ def run_blender(
     timeout: int | None = None,
     on_line: Callable[[str], None] | None = None,
 ) -> RunnerResult:
-    """Launch a Blender subprocess in background mode with the given script.
+    """Launch Blender with bounded execution and concurrent output capture.
 
-    The invocation is:
-        blender --background --python <script_path> -- <args...>
-
-    Args:
-        script_path:  Path to the Blender Python script to inject.
-        args:         List of argument strings passed after '--' to the script.
-        config:       Optional config dict (used for executable resolution and timeout).
-        timeout:      Max seconds to wait. Overrides config if given. Default: 300.
-        on_line:      Optional callback called with each stdout line as it arrives.
-                      Used by Annáll telemetry to stream Blender progress.
-
-    Returns:
-        RunnerResult with returncode, stdout, stderr, duration, timed_out flag.
-
-    Raises:
-        BlenderNotFoundError: If the Blender executable cannot be located.
-        OSError: If the subprocess cannot be launched (permissions, etc.)
+    The invocation remains ``blender --background --python <script> -- <args>``.
+    Standard output and standard error are drained concurrently so either pipe
+    can produce large output without blocking the child process.
     """
-    blender_exe = resolve_blender_executable(config)
 
-    # Resolve timeout: explicit arg > config > default 300s
-    if timeout is None:
-        timeout = int((config or {}).get("blender", {}).get("timeout_seconds", 300))
+    blender_executable = resolve_blender_executable(config)
+    timeout_seconds = (
+        float(timeout)
+        if timeout is not None
+        else float(
+            (config or {}).get("blender", {}).get("timeout_seconds", _DEFAULT_TIMEOUT_SECONDS)
+        )
+    )
 
-    cmd: list[str] = [
-        str(blender_exe),
+    command: list[str] = [
+        str(blender_executable),
         "--background",
         "--python",
         str(script_path),
-        "--",  # Blender stops parsing args here; remainder goes to the script
+        "--",
         *args,
     ]
 
-    logger.debug("Launching Blender subprocess: %s", " ".join(cmd))
+    logger.debug("Launching Blender subprocess: %s", " ".join(command))
     start_time = time.monotonic()
-
     stdout_lines: list[str] = []
     stderr_lines: list[str] = []
+    reader_errors: list[Exception] = []
     timed_out = False
 
     try:
         process = subprocess.Popen(
-            cmd,
+            command,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
             encoding="utf-8",
             errors="replace",
+            **_subprocess_group_options(),
         )
-
-        # Stream stdout line by line for the on_line callback; capture all output.
-        try:
-            # H-006: Replace assert statements with explicit RuntimeError guards.
-            # assert is silently stripped under python -O, giving a cryptic TypeError
-            # when the loop tries to iterate over None.
-            if process.stdout is None or process.stderr is None:
-                raise RuntimeError(
-                    "Blender subprocess stdout/stderr are None despite PIPE flag. "
-                    "This is a platform or Python version bug — cannot stream output."
-                )
-
-            # Collect stdout with optional line streaming
-            for line in process.stdout:
-                line_stripped = line.rstrip("\n")
-                stdout_lines.append(line_stripped)
-                if on_line is not None:
-                    try:
-                        on_line(line_stripped)
-                    except Exception:
-                        pass  # Never let a callback kill the subprocess reader
-
-            # Wait for process and collect remaining stderr.
-            # H-015 note: stdout EOF is reached first (process closes stdout before
-            # exiting). communicate() then drains any remaining stderr buffer.
-            # H-002: Add a hard timeout to the post-kill communicate() path so a
-            # wedged Windows process (e.g. AV hold, open handles) cannot hang the
-            # forge indefinitely. The post-kill window is 30 s — generous for normal
-            # TerminateProcess() but bounded for pathological cases.
-            _POST_KILL_TIMEOUT = 30
-            try:
-                _, stderr_raw = process.communicate(timeout=timeout)
-                stderr_lines.extend(stderr_raw.splitlines() if stderr_raw else [])
-            except subprocess.TimeoutExpired:
-                process.kill()
-                try:
-                    _, stderr_raw = process.communicate(timeout=_POST_KILL_TIMEOUT)
-                    stderr_lines.extend(stderr_raw.splitlines() if stderr_raw else [])
-                except subprocess.TimeoutExpired:
-                    # H-002: Process did not die within post-kill window.
-                    # Log clearly and continue — we cannot block forever.
-                    logger.error(
-                        "Blender process did not terminate after kill "
-                        "(post-kill timeout=%ds, script=%s). "
-                        "Continuing without further stderr collection.",
-                        _POST_KILL_TIMEOUT,
-                        script_path,
-                    )
-                timed_out = True
-                logger.warning(
-                    "Blender subprocess timed out after %d seconds (script: %s)",
-                    timeout,
-                    script_path,
-                )
-        except Exception as exc:
-            logger.error("Error reading Blender subprocess output: %s", exc)
-            process.kill()
-            process.wait()
-
     except OSError as exc:
         raise OSError(
-            f"Failed to launch Blender subprocess. "
-            f"Executable: {blender_exe}. Error: {exc}"
+            f"Failed to launch Blender subprocess. Executable: {blender_executable}. Error: {exc}"
         ) from exc
+
+    if process.stdout is None or process.stderr is None:
+        logger.error(
+            "Blender subprocess stdout/stderr are None despite PIPE configuration. "
+            "Output cannot be captured safely."
+        )
+        try:
+            process.kill()
+            process.wait(timeout=_POST_TERMINATION_WAIT_SECONDS)
+        except (OSError, subprocess.TimeoutExpired):
+            logger.error("Unable to stop Blender after invalid pipe state", exc_info=True)
+        duration = time.monotonic() - start_time
+        return RunnerResult(
+            returncode=process.returncode if process.returncode is not None else -1,
+            stdout="",
+            stderr="",
+            duration_seconds=duration,
+            timed_out=False,
+        )
+
+    readers = [
+        threading.Thread(
+            target=_drain_stream,
+            args=(process.stdout, stdout_lines, reader_errors, on_line),
+            name="blender-stdout-reader",
+            daemon=True,
+        ),
+        threading.Thread(
+            target=_drain_stream,
+            args=(process.stderr, stderr_lines, reader_errors),
+            name="blender-stderr-reader",
+            daemon=True,
+        ),
+    ]
+    for reader in readers:
+        reader.start()
+
+    try:
+        process.wait(timeout=timeout_seconds)
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        logger.warning(
+            "Blender subprocess timed out after %.3f seconds (script: %s)",
+            timeout_seconds,
+            script_path,
+        )
+        _terminate_process_tree(process)
+        try:
+            process.wait(timeout=_POST_TERMINATION_WAIT_SECONDS)
+        except subprocess.TimeoutExpired:
+            logger.error(
+                "Blender process did not terminate within %.1f seconds after timeout",
+                _POST_TERMINATION_WAIT_SECONDS,
+            )
+            _close_pipe(process.stdout)
+            _close_pipe(process.stderr)
+
+    _join_reader_threads(readers, process)
+
+    for error in reader_errors:
+        logger.error("Error reading Blender subprocess output: %s", error)
 
     duration = time.monotonic() - start_time
     returncode = process.returncode if process.returncode is not None else -1
-
     result = RunnerResult(
         returncode=returncode,
         stdout="\n".join(stdout_lines),
@@ -305,7 +399,7 @@ def run_blender(
     )
 
     logger.debug(
-        "Blender subprocess finished: returncode=%d, duration=%.1fs, timed_out=%s",
+        "Blender subprocess finished: returncode=%d, duration=%.3fs, timed_out=%s",
         returncode,
         duration,
         timed_out,

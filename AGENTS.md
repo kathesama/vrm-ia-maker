@@ -31,6 +31,16 @@ project ticket artifacts inside `.sdd-kit/`.
 - Ticket artifacts remain local under `.ai-specs/changes/{TICKET}/` and are not
   committed unless a future ADR explicitly changes this policy.
 
+## Repository Language Policy
+
+- All new or modified code comments, docstrings, test descriptions, log messages,
+  exception messages, documentation, commit messages, pull request content, and
+  review comments must be written in English.
+- Do not perform broad translation-only edits to untouched legacy files. Apply the
+  policy to text introduced or deliberately modified by the current change.
+- User conversations and informal planning outside the repository may use another
+  language; committed repository text remains English.
+
 ## Project Architecture Constraints
 
 - This repository is an offline/build-time CLI for producing VRM avatar assets.

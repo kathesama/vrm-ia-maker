@@ -1,4 +1,5 @@
 """Tests for H-001 (temp dir leak), H-002 (post-kill timeout), H-006 (assert→RuntimeError)."""
+
 from __future__ import annotations
 
 import subprocess
@@ -23,13 +24,15 @@ class TestForgeTmpDirCleanup:
         base_asset = tmp_path / "base.vrm"
         base_asset.write_bytes(b"\x00" * 16)
 
-        spec = AvatarSpec.model_validate({
-            "spec_version": "1.0",
-            "avatar_id": "test_h001",
-            "display_name": "H001 Test",
-            "base_asset_id": "vroid/sample_a",
-            "metadata": {"author": "Test", "license": "CC0-1.0"},
-        })
+        spec = AvatarSpec.model_validate(
+            {
+                "spec_version": "1.0",
+                "avatar_id": "test_h001",
+                "display_name": "H001 Test",
+                "base_asset_id": "vroid/sample_a",
+                "metadata": {"author": "Test", "license": "CC0-1.0"},
+            }
+        )
 
         created_tmp_dirs: list[Path] = []
 
@@ -62,13 +65,15 @@ class TestForgeTmpDirCleanup:
         base_asset = tmp_path / "base.vrm"
         base_asset.write_bytes(b"\x00" * 16)
 
-        spec = AvatarSpec.model_validate({
-            "spec_version": "1.0",
-            "avatar_id": "test_h001b",
-            "display_name": "H001b Test",
-            "base_asset_id": "vroid/sample_a",
-            "metadata": {"author": "Test", "license": "CC0-1.0"},
-        })
+        spec = AvatarSpec.model_validate(
+            {
+                "spec_version": "1.0",
+                "avatar_id": "test_h001b",
+                "display_name": "H001b Test",
+                "base_asset_id": "vroid/sample_a",
+                "metadata": {"author": "Test", "license": "CC0-1.0"},
+            }
+        )
 
         created_tmp_dirs: list[Path] = []
         original_mkdtemp = __import__("tempfile").mkdtemp
@@ -78,10 +83,14 @@ class TestForgeTmpDirCleanup:
             created_tmp_dirs.append(Path(d))
             return d
 
-        with patch("tempfile.mkdtemp", side_effect=tracking_mkdtemp), patch(
-            "seidr_smidja._internal.blender_runner.resolve_blender_executable",
-            side_effect=BlenderNotFoundError("not found", []),
-        ), pytest.raises(ForgeBuildError):
+        with (
+            patch("tempfile.mkdtemp", side_effect=tracking_mkdtemp),
+            patch(
+                "seidr_smidja._internal.blender_runner.resolve_blender_executable",
+                side_effect=BlenderNotFoundError("not found", []),
+            ),
+            pytest.raises(ForgeBuildError),
+        ):
             build(spec, base_asset, tmp_path / "output")
 
         for td in created_tmp_dirs:
@@ -117,13 +126,9 @@ class TestBlenderRunnerNullHandles:
         fake_blender = tmp_path / "blender.exe"
         fake_blender.write_bytes(b"")
 
-        resolve_path = (
-            "seidr_smidja._internal.blender_runner.resolve_blender_executable"
-        )
+        resolve_path = "seidr_smidja._internal.blender_runner.resolve_blender_executable"
         with (
-            caplog.at_level(
-                logging.ERROR, logger="seidr_smidja._internal.blender_runner"
-            ),
+            caplog.at_level(logging.ERROR, logger="seidr_smidja._internal.blender_runner"),
             patch(resolve_path, return_value=fake_blender),
             patch("subprocess.Popen", return_value=mock_process),
         ):
@@ -141,49 +146,39 @@ class TestBlenderRunnerNullHandles:
 
 
 class TestBlenderPostKillTimeout:
-    """H-002: communicate() after process.kill() must have a timeout."""
+    """H-002: post-timeout process waits remain bounded."""
 
-    def test_post_kill_communicate_has_timeout(self, tmp_path: Path) -> None:
-        """When TimeoutExpired fires, communicate() in the except branch uses timeout."""
-        from seidr_smidja._internal.blender_runner import run_blender
+    def test_post_termination_wait_has_a_timeout(self, tmp_path: Path) -> None:
+        """A process that ignores termination cannot block the runner forever."""
+        from seidr_smidja._internal import blender_runner
 
         fake_script = tmp_path / "fake.py"
-        fake_script.write_text("pass")
+        fake_script.write_text("pass", encoding="utf-8")
         fake_blender = tmp_path / "blender.exe"
         fake_blender.write_bytes(b"")
 
-        communicate_call_kwargs: list[dict] = []
-
-        # First communicate raises TimeoutExpired, second succeeds
-        call_count = 0
-
-        def mock_communicate(timeout=None):
-            nonlocal call_count
-            communicate_call_kwargs.append({"timeout": timeout})
-            call_count += 1
-            if call_count == 1:
-                raise subprocess.TimeoutExpired(cmd="blender", timeout=1)
-            return (None, "")  # post-kill drain
-
         mock_process = MagicMock()
-        mock_process.stdout = iter([])  # empty stdout
-        mock_process.stderr = MagicMock()
+        mock_process.stdout = iter([])
+        mock_process.stderr = iter([])
         mock_process.returncode = -9
-        mock_process.communicate.side_effect = mock_communicate
+        mock_process.wait.side_effect = [
+            subprocess.TimeoutExpired(cmd="blender", timeout=1),
+            subprocess.TimeoutExpired(cmd="blender", timeout=5),
+        ]
 
-        resolve_path = (
-            "seidr_smidja._internal.blender_runner.resolve_blender_executable"
-        )
         with (
-            patch(resolve_path, return_value=fake_blender),
+            patch(
+                "seidr_smidja._internal.blender_runner.resolve_blender_executable",
+                return_value=fake_blender,
+            ),
             patch("subprocess.Popen", return_value=mock_process),
+            patch.object(blender_runner, "_terminate_process_tree"),
         ):
-            result = run_blender(fake_script, [], timeout=1, config={})
+            result = blender_runner.run_blender(fake_script, [], timeout=1, config={})
 
-        # The second communicate call (post-kill) must have a timeout set
-        assert len(communicate_call_kwargs) >= 2, "Expected at least two communicate() calls"
-        post_kill_kwargs = communicate_call_kwargs[1]
-        assert post_kill_kwargs["timeout"] is not None, (
-            "Post-kill communicate() must have a timeout — H-002 guard missing"
+        assert mock_process.wait.call_args_list[0].kwargs["timeout"] == 1.0
+        assert (
+            mock_process.wait.call_args_list[1].kwargs["timeout"]
+            == blender_runner._POST_TERMINATION_WAIT_SECONDS
         )
         assert result.timed_out is True

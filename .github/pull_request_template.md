@@ -101,6 +101,7 @@ Additional integration commands:
 
 - [ ] Scope is small and focused
 - [ ] No secrets or credentials are present
+- [ ] New or modified repository text is written in English
 - [ ] Submodule pointer is intentional and reviewed
 - [ ] SDD validators pass
 - [ ] Tests cover the change or the validation gap is documented
