@@ -133,6 +133,24 @@ def test_assembly_manifest_rejects_unknown_fields() -> None:
         AssemblyManifest.model_validate(payload)
 
 
+def test_assembly_manifest_rejects_invalid_material_override_color() -> None:
+    payload = {
+        "schema_version": "1.0",
+        "character_id": "juana",
+        "display_name": "Juana",
+        "asset_pack_id": "juana-test-pack",
+        "selections": {
+            "hair": {"asset_id": "hair-v1", "enabled": True},
+            "outfit": {"asset_id": "outfit-v1", "enabled": True},
+        },
+        "material_overrides": {"Hair_Primary": "blue"},
+        "metadata": metadata(),
+    }
+
+    with pytest.raises(ValidationError, match="#RRGGBB"):
+        AssemblyManifest.model_validate(payload)
+
+
 def compiled_payload() -> dict[str, object]:
     return {
         "schema_version": "1.0",
@@ -195,4 +213,28 @@ def test_compiled_spec_rejects_enabled_and_disabled_overlap() -> None:
     }
 
     with pytest.raises(ValidationError, match="both enabled and disabled"):
+        CompiledAssemblySpec.model_validate(payload)
+
+
+def test_compiled_spec_rejects_rigid_attachment_without_attachment_bone() -> None:
+    payload = deepcopy(compiled_payload())
+    del payload["components"][0]["attachment_bone"]  # type: ignore[index]
+
+    with pytest.raises(ValidationError, match="attachment_bone"):
+        CompiledAssemblySpec.model_validate(payload)
+
+
+def test_compiled_spec_rejects_skinned_component_without_required_bones() -> None:
+    payload = deepcopy(compiled_payload())
+    payload["components"][0] = {  # type: ignore[index]
+        "asset_id": "outfit-v1",
+        "slot": "outfit",
+        "kind": "skinned_mesh",
+        "path": "assets/outfit.glb",
+        "object_name": "Outfit",
+        "sha256": DIGEST_C,
+        "material_names": ["Outfit_Primary"],
+    }
+
+    with pytest.raises(ValidationError, match="required_bone"):
         CompiledAssemblySpec.model_validate(payload)

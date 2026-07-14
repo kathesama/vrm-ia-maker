@@ -6,10 +6,24 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
 SHA256 = Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
 NonEmptyString = Annotated[str, Field(min_length=1)]
+_HEX_DIGITS = frozenset("0123456789abcdefABCDEF")
+
+
+def _validate_hex_color(value: str) -> str:
+    if (
+        len(value) != 7
+        or not value.startswith("#")
+        or any(digit not in _HEX_DIGITS for digit in value[1:])
+    ):
+        raise ValueError("Material override colors must use #RRGGBB.")
+    return value
+
+
+HexColor = Annotated[str, AfterValidator(_validate_hex_color)]
 
 
 class StrictModel(BaseModel):
@@ -45,6 +59,17 @@ class ComponentKind(StrEnum):
     SKINNED_MESH = "skinned_mesh"
 
 
+def _validate_component_integration_contract(
+    kind: ComponentKind,
+    attachment_bone: str | None,
+    required_bones: tuple[str, ...],
+) -> None:
+    if kind is ComponentKind.RIGID_ATTACHMENT and attachment_bone is None:
+        raise ValueError("Rigid attachments require attachment_bone.")
+    if kind is ComponentKind.SKINNED_MESH and not required_bones:
+        raise ValueError("Skinned meshes require at least one required_bone.")
+
+
 class AssetReference(StrictModel):
     """Immutable identity and integrity metadata for one source asset."""
 
@@ -76,10 +101,11 @@ class ComponentAsset(AssetReference):
     @model_validator(mode="after")
     def validate_integration_contract(self) -> ComponentAsset:
         """Require integration metadata appropriate for the component kind."""
-        if self.kind is ComponentKind.RIGID_ATTACHMENT and self.attachment_bone is None:
-            raise ValueError("Rigid attachments require attachment_bone.")
-        if self.kind is ComponentKind.SKINNED_MESH and not self.required_bones:
-            raise ValueError("Skinned meshes require at least one required_bone.")
+        _validate_component_integration_contract(
+            self.kind,
+            self.attachment_bone,
+            self.required_bones,
+        )
         return self
 
 
@@ -126,7 +152,7 @@ class AssemblyManifest(StrictModel):
     display_name: NonEmptyString
     asset_pack_id: NonEmptyString
     selections: dict[ComponentSlot, ComponentSelection]
-    material_overrides: dict[NonEmptyString, NonEmptyString] = Field(default_factory=dict)
+    material_overrides: dict[NonEmptyString, HexColor] = Field(default_factory=dict)
     metadata: AvatarMetadata
 
 
@@ -147,6 +173,16 @@ class ResolvedComponent(ResolvedAsset):
     attachment_bone: NonEmptyString | None = None
     required_bones: tuple[NonEmptyString, ...] = ()
     material_names: tuple[NonEmptyString, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_integration_contract(self) -> ResolvedComponent:
+        """Require resolved integration metadata appropriate for the component kind."""
+        _validate_component_integration_contract(
+            self.kind,
+            self.attachment_bone,
+            self.required_bones,
+        )
+        return self
 
 
 class DisabledComponent(StrictModel):
@@ -181,7 +217,7 @@ class CompiledAssemblySpec(StrictModel):
     base_asset: ResolvedAsset
     components: tuple[ResolvedComponent, ...]
     disabled_components: tuple[DisabledComponent, ...]
-    material_overrides: dict[NonEmptyString, NonEmptyString]
+    material_overrides: dict[NonEmptyString, HexColor]
     vrm_spec: VrmBuildSpec
 
     @model_validator(mode="after")
