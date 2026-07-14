@@ -298,6 +298,38 @@ class TestSubprocessContract:
             time.sleep(0.02)
         assert _process_is_running(child_pid) is False
 
+    @pytest.mark.skipif(os.name == "nt", reason="POSIX process-group assertion")
+    def test_timeout_still_applies_after_leader_exits_with_inherited_pipes(
+        self, fake_blender: Path, dummy_script: Path, tmp_path: Path
+    ) -> None:
+        child_pid_path = tmp_path / "orphan-child.pid"
+        started = time.monotonic()
+
+        result = _run_with_fake(
+            fake_blender,
+            dummy_script,
+            [
+                "--scenario",
+                "leader-exits-child-holds-pipes",
+                "--child-pid",
+                str(child_pid_path),
+            ],
+            timeout=0.3,
+        )
+        elapsed = time.monotonic() - started
+
+        assert result.timed_out is True
+        assert result.returncode == blender_runner._TIMEOUT_RETURN_CODE
+        assert child_pid_path.exists()
+        child_pid = int(child_pid_path.read_text(encoding="utf-8"))
+
+        deadline = time.monotonic() + 2.0
+        while _process_is_running(child_pid) and time.monotonic() < deadline:
+            time.sleep(0.02)
+
+        assert _process_is_running(child_pid) is False
+        assert elapsed < 2.0
+
     def test_explicit_timeout_wins_over_configuration(self, dummy_script: Path) -> None:
         process = _completed_mock_process()
         with (

@@ -42,6 +42,7 @@ _DEFAULT_TIMEOUT_SECONDS = 300.0
 _TERMINATION_GRACE_SECONDS = 0.5
 _POST_TERMINATION_WAIT_SECONDS = 5.0
 _READER_JOIN_TIMEOUT_SECONDS = 2.0
+_TIMEOUT_RETURN_CODE = 124  # Conventional command timeout status.
 
 
 class BlenderNotFoundError(RuntimeError):
@@ -182,11 +183,9 @@ def _drain_stream(
 
 
 def _terminate_process_tree(process: subprocess.Popen[str]) -> None:
-    """Terminate the Blender process and descendants using a bounded strategy."""
+    """Terminate the Blender process group, even after its leader has exited."""
 
     if os.name == "nt":
-        if process.poll() is not None:
-            return
         try:
             subprocess.run(
                 ["taskkill", "/PID", str(process.pid), "/T", "/F"],
@@ -205,8 +204,8 @@ def _terminate_process_tree(process: subprocess.Popen[str]) -> None:
         return
 
     # POSIX launches Blender with start_new_session=True, so the process ID is
-    # also the process-group ID. Keep targeting that group even if the leader
-    # exits after the timeout while descendants still hold inherited pipes.
+    # also the process-group ID. The group may still contain descendants after
+    # the leader exits, so process.poll() must not short-circuit this cleanup.
     process_group_id = process.pid
     try:
         os.killpg(process_group_id, signal.SIGTERM)
@@ -245,7 +244,7 @@ def _terminate_process_tree(process: subprocess.Popen[str]) -> None:
 
 
 def _close_pipe(pipe: IO[Any] | None) -> None:
-    """Close a subprocess pipe without masking the original execution result."""
+    """Close a subprocess pipe after its reader thread has stopped."""
 
     if pipe is None:
         return
@@ -253,24 +252,37 @@ def _close_pipe(pipe: IO[Any] | None) -> None:
         pipe.close()
 
 
-def _join_reader_threads(
+def _wait_for_reader_threads(
     readers: list[threading.Thread],
-    process: subprocess.Popen[str],
-) -> None:
-    """Join output readers and close pipes if a platform leaves them blocked."""
+    deadline: float,
+) -> bool:
+    """Wait until all output readers finish or the monotonic deadline expires."""
 
     for reader in readers:
-        reader.join(timeout=_READER_JOIN_TIMEOUT_SECONDS)
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        reader.join(timeout=remaining)
+    return all(not reader.is_alive() for reader in readers)
 
-    blocked = [reader for reader in readers if reader.is_alive()]
-    if not blocked:
-        return
 
-    logger.error("Blender output readers did not stop after process termination; closing pipes")
-    _close_pipe(process.stdout)
-    _close_pipe(process.stderr)
-    for reader in blocked:
-        reader.join(timeout=_READER_JOIN_TIMEOUT_SECONDS)
+def _wait_for_process_after_termination(process: subprocess.Popen[str]) -> None:
+    """Reap the direct Blender process without blocking indefinitely."""
+
+    try:
+        process.wait(timeout=_POST_TERMINATION_WAIT_SECONDS)
+    except subprocess.TimeoutExpired:
+        logger.error(
+            "Blender process did not terminate within %.1f seconds after timeout",
+            _POST_TERMINATION_WAIT_SECONDS,
+        )
+        if process.poll() is None:
+            with contextlib.suppress(OSError):
+                process.kill()
+            try:
+                process.wait(timeout=_POST_TERMINATION_WAIT_SECONDS)
+            except subprocess.TimeoutExpired:
+                logger.error("Blender process remained unreaped after the final kill attempt")
 
 
 def run_blender(
@@ -283,8 +295,8 @@ def run_blender(
     """Launch Blender with bounded execution and concurrent output capture.
 
     The invocation remains ``blender --background --python <script> -- <args>``.
-    Standard output and standard error are drained concurrently so either pipe
-    can produce large output without blocking the child process.
+    The timeout covers both the direct process and output streams inherited by
+    descendants, so a child cannot keep the runner blocked after Blender exits.
     """
 
     blender_executable = resolve_blender_executable(config)
@@ -363,6 +375,7 @@ def run_blender(
     for reader in readers:
         reader.start()
 
+    deadline = time.monotonic() + max(timeout_seconds, 0.0)
     try:
         process.wait(timeout=timeout_seconds)
     except subprocess.TimeoutExpired:
@@ -372,24 +385,47 @@ def run_blender(
             timeout_seconds,
             script_path,
         )
-        _terminate_process_tree(process)
-        try:
-            process.wait(timeout=_POST_TERMINATION_WAIT_SECONDS)
-        except subprocess.TimeoutExpired:
-            logger.error(
-                "Blender process did not terminate within %.1f seconds after timeout",
-                _POST_TERMINATION_WAIT_SECONDS,
+    else:
+        if not _wait_for_reader_threads(readers, deadline):
+            timed_out = True
+            logger.warning(
+                "Blender subprocess output remained open after the process leader exited; "
+                "terminating descendants at the %.3f-second deadline (script: %s)",
+                timeout_seconds,
+                script_path,
             )
-            _close_pipe(process.stdout)
-            _close_pipe(process.stderr)
 
-    _join_reader_threads(readers, process)
+    readers_finished = all(not reader.is_alive() for reader in readers)
+    if timed_out:
+        _terminate_process_tree(process)
+        _wait_for_process_after_termination(process)
+        readers_finished = _wait_for_reader_threads(
+            readers,
+            time.monotonic() + _READER_JOIN_TIMEOUT_SECONDS,
+        )
+
+    if readers_finished:
+        # Closing TextIOWrapper objects is safe only after their reader threads
+        # have exited. Closing them while a thread is blocked in iteration can
+        # deadlock on CPython's internal I/O lock.
+        _close_pipe(process.stdout)
+        _close_pipe(process.stderr)
+    else:
+        logger.error(
+            "Blender output readers remained blocked after process-tree termination; "
+            "returning without closing their streams to preserve bounded execution"
+        )
 
     for error in reader_errors:
         logger.error("Error reading Blender subprocess output: %s", error)
 
     duration = time.monotonic() - start_time
     returncode = process.returncode if process.returncode is not None else -1
+    if timed_out and returncode == 0:
+        # A leader may exit successfully while a descendant keeps inherited
+        # output pipes open. Preserve timeout failure semantics for Forge.
+        returncode = _TIMEOUT_RETURN_CODE
+
     result = RunnerResult(
         returncode=returncode,
         stdout="\n".join(stdout_lines),

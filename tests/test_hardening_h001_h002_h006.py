@@ -161,9 +161,11 @@ class TestBlenderPostKillTimeout:
         mock_process.stdout = iter([])
         mock_process.stderr = iter([])
         mock_process.returncode = -9
+        mock_process.poll.return_value = None
         mock_process.wait.side_effect = [
             subprocess.TimeoutExpired(cmd="blender", timeout=1),
             subprocess.TimeoutExpired(cmd="blender", timeout=5),
+            -9,
         ]
 
         with (
@@ -179,6 +181,10 @@ class TestBlenderPostKillTimeout:
         assert mock_process.wait.call_args_list[0].kwargs["timeout"] == 1.0
         assert (
             mock_process.wait.call_args_list[1].kwargs["timeout"]
+            == blender_runner._POST_TERMINATION_WAIT_SECONDS
+        )
+        assert (
+            mock_process.wait.call_args_list[2].kwargs["timeout"]
             == blender_runner._POST_TERMINATION_WAIT_SECONDS
         )
         assert result.timed_out is True

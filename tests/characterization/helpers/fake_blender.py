@@ -68,7 +68,7 @@ def main() -> int:
         time.sleep(float(_value(arguments, "--seconds", "30") or "30"))
         return 0
 
-    if scenario == "child-sleep":
+    if scenario in {"child-sleep", "leader-exits-child-holds-pipes"}:
         pid_path_value = _value(arguments, "--child-pid")
         if pid_path_value is None:
             raise SystemExit("--child-pid is required")
@@ -78,7 +78,7 @@ def main() -> int:
             "from pathlib import Path; "
             "signal.signal(signal.SIGTERM, signal.SIG_IGN); "
             "Path(sys.argv[1]).write_text(str(os.getpid()), encoding='utf-8'); "
-            "time.sleep(30)"
+            "time.sleep(5)"
         )
         python_executable = sys.executable or shutil.which("python3")
         if not python_executable:
@@ -87,6 +87,8 @@ def main() -> int:
         deadline = time.monotonic() + 2.0
         while not pid_path.exists() and time.monotonic() < deadline:
             time.sleep(0.01)
+        if scenario == "leader-exits-child-holds-pipes":
+            return 0
         time.sleep(30)
         return 0
 

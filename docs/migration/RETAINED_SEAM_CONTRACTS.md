@@ -38,6 +38,7 @@ The classifications are:
 | A failing observation callback never terminates Blender or discards captured output. | `PRESERVE` | Callback regression test. |
 | Standard output and standard error are drained concurrently. | `HARDENED` | Large-stderr regression test proves the pipe cannot deadlock the parent. |
 | The configured timeout bounds total subprocess execution, including silent processes. | `HARDENED` | Real silent-process timeout test. |
+| The timeout remains active after the process leader exits while descendants keep inherited output pipes open. | `HARDENED` | Leader-exit descendant regression test. |
 | Timeout terminates the Blender process tree rather than only the direct process. | `HARDENED` | POSIX descendant-process regression test plus Windows branch unit coverage. |
 | Partial output is retained after timeout or non-zero exit. | `PRESERVE` | Output-capture characterization tests. |
 | Invalid UTF-8 is decoded with replacement instead of crashing the runner. | `PRESERVE` | Real invalid-byte regression test. |
