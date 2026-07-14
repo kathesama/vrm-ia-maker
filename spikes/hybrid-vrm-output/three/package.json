@@ -1,0 +1,9 @@
+{
+  "name": "vrm-ia-maker-hybrid-spike",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@pixiv/three-vrm": "3.5.1",
+    "three": "0.183.2"
+  }
+}
