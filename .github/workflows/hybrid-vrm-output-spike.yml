@@ -1,0 +1,209 @@
+name: Hybrid VRM output spike
+
+on:
+  push:
+    branches:
+      - spike-hybrid-vrm-output
+  pull_request:
+    branches:
+      - development
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-vrm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      BUILD_DIR: build/hybrid-spike
+      BLENDER_VERSION: 4.2.0
+      BLENDER_ARCHIVE: blender-4.2.0-linux-x64.tar.xz
+      BLENDER_DIRECTORY: blender-4.2.0-linux-x64
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: spikes/hybrid-vrm-output/three/package.json
+
+      - name: Download pinned Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tools "$BUILD_DIR"
+          curl --fail --location --retry 3 \
+            "https://download.blender.org/release/Blender4.2/${BLENDER_ARCHIVE}" \
+            --output "/tmp/${BLENDER_ARCHIVE}"
+          tar --extract --file "/tmp/${BLENDER_ARCHIVE}" --directory .tools
+          blender_path="$GITHUB_WORKSPACE/.tools/${BLENDER_DIRECTORY}/blender"
+          test -x "$blender_path"
+          echo "BLENDER=$blender_path" >> "$GITHUB_ENV"
+          "$blender_path" --version | head -n 2
+
+      - name: Download the current VRM Add-on release
+        id: vrm_addon
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          import urllib.request
+          from pathlib import Path
+
+          api_url = "https://api.github.com/repos/saturday06/VRM-Addon-for-Blender/releases/latest"
+          request = urllib.request.Request(
+              api_url,
+              headers={
+                  "Accept": "application/vnd.github+json",
+                  "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
+                  "User-Agent": "vrm-ia-maker-hybrid-spike",
+              },
+          )
+          with urllib.request.urlopen(request, timeout=30) as response:
+              release = json.load(response)
+
+          assets = [asset for asset in release.get("assets", []) if asset["name"].lower().endswith(".zip")]
+          if not assets:
+              raise SystemExit("The latest VRM Add-on release has no ZIP asset.")
+          preferred = [
+              asset
+              for asset in assets
+              if "release" in asset["name"].lower() and "vrm" in asset["name"].lower()
+          ]
+          asset = (preferred or assets)[0]
+
+          destination = Path(os.environ["BUILD_DIR"]) / "vrm-addon.zip"
+          destination.parent.mkdir(parents=True, exist_ok=True)
+          download_request = urllib.request.Request(
+              asset["browser_download_url"],
+              headers={"User-Agent": "vrm-ia-maker-hybrid-spike"},
+          )
+          with urllib.request.urlopen(download_request, timeout=120) as response:
+              destination.write_bytes(response.read())
+
+          digest = hashlib.sha256(destination.read_bytes()).hexdigest()
+          output = Path(os.environ["GITHUB_OUTPUT"])
+          with output.open("a", encoding="utf-8") as handle:
+              handle.write(f"tag={release['tag_name']}\n")
+              handle.write(f"asset={asset['name']}\n")
+              handle.write(f"url={asset['browser_download_url']}\n")
+              handle.write(f"sha256={digest}\n")
+          print(f"Downloaded {asset['name']} from {release['tag_name']} ({digest})")
+          PY
+
+      - name: Install and enable the VRM Add-on
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$BLENDER" --background \
+            --python spikes/hybrid-vrm-output/install_vrm_addon.py \
+            -- "$BUILD_DIR/vrm-addon.zip"
+
+      - name: Create the original humanoid GLB fixture in Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$BLENDER" --background \
+            --python spikes/hybrid-vrm-output/create_fixture_base.py \
+            -- "$BUILD_DIR/base.glb"
+          test -s "$BUILD_DIR/base.glb"
+
+      - name: Install Three.js spike dependencies
+        working-directory: spikes/hybrid-vrm-output/three
+        run: npm install --no-audit --no-fund
+
+      - name: Compile the assembly manifest with Three.js
+        shell: bash
+        run: |
+          set -euo pipefail
+          node spikes/hybrid-vrm-output/three/compose.mjs \
+            spikes/hybrid-vrm-output/assembly.manifest.json \
+            "$BUILD_DIR/base.glb" \
+            "$BUILD_DIR/compiled-spec.json" \
+            "$BUILD_DIR/three-inspection.json"
+
+      - name: Finalize and export VRM 1.0 in Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$BLENDER" --background \
+            --python src/seidr_smidja/forge/scripts/build_avatar.py \
+            -- \
+            --spec "$BUILD_DIR/compiled-spec.json" \
+            --base "$BUILD_DIR/base.glb" \
+            --output "$BUILD_DIR/hybrid-spike-avatar.vrm"
+          test -s "$BUILD_DIR/hybrid-spike-avatar.vrm"
+
+      - name: Validate the VRM binary and extension contracts
+        run: |
+          python spikes/hybrid-vrm-output/structural_validate.py \
+            "$BUILD_DIR/hybrid-spike-avatar.vrm" \
+            "$BUILD_DIR/structural-validation.json"
+
+      - name: Load and exercise the output with Three.js
+        run: |
+          node spikes/hybrid-vrm-output/three/validate.mjs \
+            "$BUILD_DIR/hybrid-spike-avatar.vrm" \
+            "$BUILD_DIR/threejs-validation.json"
+
+      - name: Record the toolchain used by the successful build
+        env:
+          VRM_ADDON_TAG: ${{ steps.vrm_addon.outputs.tag }}
+          VRM_ADDON_ASSET: ${{ steps.vrm_addon.outputs.asset }}
+          VRM_ADDON_URL: ${{ steps.vrm_addon.outputs.url }}
+          VRM_ADDON_SHA256: ${{ steps.vrm_addon.outputs.sha256 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          blender_version = subprocess.check_output(
+              [os.environ["BLENDER"], "--version"],
+              text=True,
+          ).splitlines()[0]
+          report = {
+              "blender": blender_version,
+              "vrm_addon": {
+                  "tag": os.environ["VRM_ADDON_TAG"],
+                  "asset": os.environ["VRM_ADDON_ASSET"],
+                  "url": os.environ["VRM_ADDON_URL"],
+                  "sha256": os.environ["VRM_ADDON_SHA256"],
+              },
+              "node": subprocess.check_output(["node", "--version"], text=True).strip(),
+              "three": "0.183.2",
+              "three_vrm": "3.5.1",
+          }
+          path = Path(os.environ["BUILD_DIR"]) / "toolchain.json"
+          path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+          PY
+
+      - name: Upload VRM and validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hybrid-vrm-output
+          path: build/hybrid-spike/
+          if-no-files-found: error
+          retention-days: 7
