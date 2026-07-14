@@ -5,9 +5,21 @@ from vrm_ia_maker.contracts import (
     AssetPackManifest,
     CompiledAssemblySpec,
 )
+from vrm_ia_maker.manifest_loader import (
+    ManifestIOError,
+    ManifestValidationError,
+    load_assembly_manifest,
+    load_asset_pack_manifest,
+    load_compiled_assembly_spec,
+)
 
 __all__ = [
     "AssemblyManifest",
     "AssetPackManifest",
     "CompiledAssemblySpec",
+    "ManifestIOError",
+    "ManifestValidationError",
+    "load_assembly_manifest",
+    "load_asset_pack_manifest",
+    "load_compiled_assembly_spec",
 ]
