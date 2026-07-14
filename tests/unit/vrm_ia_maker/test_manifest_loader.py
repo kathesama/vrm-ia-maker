@@ -175,6 +175,14 @@ def test_loader_rejects_missing_file(tmp_path: Path) -> None:
         load_asset_pack_manifest(tmp_path / "missing.json")
 
 
+def test_loader_rejects_invalid_utf8_json(tmp_path: Path) -> None:
+    path = tmp_path / "manifest.json"
+    path.write_bytes(b'{"schema_version":"\xff"}')
+
+    with pytest.raises(ManifestIOError):
+        load_asset_pack_manifest(path)
+
+
 def test_loader_wraps_contract_validation_errors(tmp_path: Path) -> None:
     path = _write_json(tmp_path / "asset-pack.json", {"schema_version": "1.0"})
 

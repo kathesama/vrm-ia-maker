@@ -63,7 +63,7 @@ def _load_json_object(path: Path) -> dict[str, Any]:
 
     try:
         content = path.read_text(encoding="utf-8")
-    except OSError as exc:
+    except (OSError, UnicodeDecodeError) as exc:
         raise ManifestIOError(f"Cannot read manifest file {path}: {exc}") from exc
 
     try:
