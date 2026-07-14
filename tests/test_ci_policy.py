@@ -35,6 +35,7 @@ def test_ruff_job_gates_production_and_reports_inherited_baseline() -> None:
 
     inherited_step = _named_step(lint_job, "Report inherited Ruff baseline")
     assert inherited_step["run"] == "ruff check src/ tests/"
+    assert inherited_step["if"] == "${{ always() }}"
     assert inherited_step["continue-on-error"] is True
 
 
@@ -48,4 +49,5 @@ def test_mypy_job_gates_production_and_reports_inherited_baseline() -> None:
 
     inherited_step = _named_step(typecheck_job, "Report inherited mypy baseline")
     assert inherited_step["run"] == "mypy src/seidr_smidja/"
+    assert inherited_step["if"] == "${{ always() }}"
     assert inherited_step["continue-on-error"] is True

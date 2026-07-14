@@ -29,6 +29,7 @@ jobs:
         run: ruff check src/vrm_ia_maker/ tests/unit/vrm_ia_maker/ tests/test_ci_policy.py
 
       - name: Report inherited Ruff baseline
+        if: ${{ always() }}
         continue-on-error: true
         run: ruff check src/ tests/
 
@@ -51,6 +52,7 @@ jobs:
         run: mypy src/vrm_ia_maker/
 
       - name: Report inherited mypy baseline
+        if: ${{ always() }}
         continue-on-error: true
         run: mypy src/seidr_smidja/
 
