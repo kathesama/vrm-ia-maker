@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "character_id": "hybrid-spike-avatar",
+  "display_name": "Hybrid Spike Avatar",
+  "base_asset": {
+    "path": "build/hybrid-spike/base.glb",
+    "required_objects": [
+      "Armature",
+      "Body",
+      "Head",
+      "LeftEyeMesh",
+      "RightEyeMesh"
+    ]
+  },
+  "components": [
+    {
+      "slot": "body",
+      "object_name": "Body",
+      "enabled": true
+    },
+    {
+      "slot": "head",
+      "object_name": "Head",
+      "enabled": true
+    },
+    {
+      "slot": "left_eye",
+      "object_name": "LeftEyeMesh",
+      "enabled": true
+    },
+    {
+      "slot": "right_eye",
+      "object_name": "RightEyeMesh",
+      "enabled": true
+    }
+  ],
+  "materials": {
+    "skin": {
+      "r": 0.72,
+      "g": 0.42,
+      "b": 0.30
+    },
+    "eyes": {
+      "r": 0.20,
+      "g": 0.55,
+      "b": 0.78
+    }
+  },
+  "required_expressions": [
+    "blink",
+    "aa",
+    "ih",
+    "ou",
+    "ee",
+    "oh"
+  ],
+  "metadata": {
+    "author": "Katherine E. Aguirre / Juana IA",
+    "license": "CC0",
+    "commercial_use": true,
+    "redistribution": true,
+    "contact_url": "https://github.com/kathesama/vrm-ia-maker"
+  }
+}
