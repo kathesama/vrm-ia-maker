@@ -4,16 +4,50 @@
   "title": "CompiledAssemblySpec",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "character_id", "display_name", "asset_pack_id", "base_asset", "components", "disabled_components", "material_overrides", "vrm_spec"],
+  "required": [
+    "schema_version",
+    "character_id",
+    "display_name",
+    "asset_pack_id",
+    "provenance",
+    "base_asset",
+    "components",
+    "disabled_components",
+    "material_overrides",
+    "vrm_spec"
+  ],
   "properties": {
     "schema_version": {"const": "1.0"},
     "character_id": {"type": "string"},
     "display_name": {"type": "string"},
     "asset_pack_id": {"type": "string"},
+    "provenance": {"$ref": "#/$defs/provenance"},
     "base_asset": {"type": "object"},
     "components": {"type": "array"},
     "disabled_components": {"type": "array"},
     "material_overrides": {"type": "object"},
     "vrm_spec": {"type": "object"}
+  },
+  "$defs": {
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "author",
+        "source",
+        "license",
+        "commercial_use",
+        "modification_allowed",
+        "redistribution_allowed"
+      ],
+      "properties": {
+        "author": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1},
+        "license": {"type": "string", "minLength": 1},
+        "commercial_use": {"type": "boolean"},
+        "modification_allowed": {"type": "boolean"},
+        "redistribution_allowed": {"type": "boolean"}
+      }
+    }
   }
 }
