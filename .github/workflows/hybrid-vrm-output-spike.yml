@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - spike-hybrid-vrm-output
+  pull_request:
+    branches:
+      - development
   workflow_dispatch:
 
 permissions:
