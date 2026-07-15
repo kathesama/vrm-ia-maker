@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "adapter_id": "modular-spike-base-adapter",
+  "adapter_version": "1.0.0",
+  "base_asset_id": "base-body-v1",
+  "bones": {
+    "hips": "hips",
+    "spine": "spine",
+    "chest": "chest",
+    "upperChest": "upperChest",
+    "neck": "neck",
+    "head": "head",
+    "leftShoulder": "leftShoulder",
+    "leftUpperArm": "leftUpperArm",
+    "leftLowerArm": "leftLowerArm",
+    "leftHand": "leftHand",
+    "rightShoulder": "rightShoulder",
+    "rightUpperArm": "rightUpperArm",
+    "rightLowerArm": "rightLowerArm",
+    "rightHand": "rightHand",
+    "leftUpperLeg": "leftUpperLeg",
+    "leftLowerLeg": "leftLowerLeg",
+    "leftFoot": "leftFoot",
+    "rightUpperLeg": "rightUpperLeg",
+    "rightLowerLeg": "rightLowerLeg",
+    "rightFoot": "rightFoot",
+    "leftEye": "L_Eye",
+    "rightEye": "R_Eye",
+    "jaw": "jaw"
+  },
+  "expression_map": {
+    "blink": [{ "shape_key": "blink", "weight": 1.0 }],
+    "blinkLeft": [{ "shape_key": "blinkLeft", "weight": 1.0 }],
+    "blinkRight": [{ "shape_key": "blinkRight", "weight": 1.0 }],
+    "aa": [{ "shape_key": "aa", "weight": 1.0 }],
+    "ih": [{ "shape_key": "ih", "weight": 1.0 }],
+    "ou": [{ "shape_key": "ou", "weight": 1.0 }],
+    "ee": [{ "shape_key": "ee", "weight": 1.0 }],
+    "oh": [{ "shape_key": "oh", "weight": 1.0 }],
+    "happy": [{ "shape_key": "happy", "weight": 1.0 }],
+    "sad": [{ "shape_key": "sad", "weight": 1.0 }],
+    "angry": [{ "shape_key": "angry", "weight": 1.0 }],
+    "surprised": [{ "shape_key": "surprised", "weight": 1.0 }],
+    "relaxed": [{ "shape_key": "relaxed", "weight": 1.0 }]
+  },
+  "look_at": {
+    "horizontal_inner_degrees": 15.0,
+    "horizontal_outer_degrees": 15.0,
+    "vertical_down_degrees": 10.0,
+    "vertical_up_degrees": 10.0
+  }
+}

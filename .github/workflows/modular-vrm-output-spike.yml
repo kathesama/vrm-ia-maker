@@ -9,8 +9,11 @@ on:
       - development
     paths:
       - ".github/workflows/modular-vrm-output-spike.yml"
+      - "packages/three-assembly-compiler/**"
       - "spikes/modular-asset-composition/**"
       - "src/seidr_smidja/forge/scripts/build_avatar.py"
+      - "src/vrm_ia_maker/**"
+      - "pyproject.toml"
   workflow_dispatch:
 
 permissions:
@@ -42,6 +45,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+
+      - name: Install production compiler dependencies
+        run: |
+          pip install -e .
+          npm ci --prefix packages/three-assembly-compiler --no-audit --no-fund
 
       - name: Download pinned Blender
         shell: bash
@@ -93,6 +101,28 @@ jobs:
             "$BUILD_DIR" \
             "$BUILD_DIR/asset-pack.manifest.json"
 
+      - name: Validate production compiler manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          from vrm_ia_maker import (
+              load_assembly_manifest,
+              load_asset_pack_manifest,
+              load_base_model_adapter_manifest,
+          )
+
+          root = Path(os.environ["BUILD_DIR"])
+          examples = Path("spikes/modular-asset-composition/examples")
+          load_asset_pack_manifest(root / "asset-pack.manifest.json")
+          load_assembly_manifest(examples / "assembly-without-accessory.production.json")
+          load_assembly_manifest(examples / "assembly-with-accessory.production.json")
+          load_base_model_adapter_manifest(examples / "base-adapter.production.json")
+          PY
+
       - name: Install Three.js spike dependencies
         working-directory: spikes/modular-asset-composition/three
         run: npm install --no-audit --no-fund
@@ -112,6 +142,47 @@ jobs:
             spikes/modular-asset-composition/examples/assembly-with-accessory.json \
             "$BUILD_DIR/compiled-with-accessory.json" \
             "$BUILD_DIR/three-inspection-with-accessory.json"
+
+      - name: Compile production assembly without accessory
+        run: |
+          node packages/three-assembly-compiler/src/cli.mjs \
+            "$BUILD_DIR/asset-pack.manifest.json" \
+            spikes/modular-asset-composition/examples/assembly-without-accessory.production.json \
+            spikes/modular-asset-composition/examples/base-adapter.production.json \
+            "$BUILD_DIR/production-compiled-without-accessory.json" \
+            "$BUILD_DIR/production-three-inspection-without-accessory.json"
+
+      - name: Compile production assembly with accessory
+        run: |
+          node packages/three-assembly-compiler/src/cli.mjs \
+            "$BUILD_DIR/asset-pack.manifest.json" \
+            spikes/modular-asset-composition/examples/assembly-with-accessory.production.json \
+            spikes/modular-asset-composition/examples/base-adapter.production.json \
+            "$BUILD_DIR/production-compiled-with-accessory.json" \
+            "$BUILD_DIR/production-three-inspection-with-accessory.json"
+
+      - name: Validate production compiled specifications
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          from vrm_ia_maker import load_compiled_assembly_spec
+
+          root = Path(os.environ["BUILD_DIR"])
+          without_accessory = load_compiled_assembly_spec(
+              root / "production-compiled-without-accessory.json"
+          )
+          with_accessory = load_compiled_assembly_spec(
+              root / "production-compiled-with-accessory.json"
+          )
+          if without_accessory.schema_version != "1.1":
+              raise SystemExit("Production compiler did not emit schema 1.1.")
+          if with_accessory.base_adapter_id != "modular-spike-base-adapter":
+              raise SystemExit("Production compiler did not preserve adapter identity.")
+          PY
 
       - name: Run negative assembly contracts
         run: |

@@ -56,6 +56,37 @@ jobs:
         continue-on-error: true
         run: mypy src/seidr_smidja/
 
+  three-assembly-compiler:
+    name: Three.js assembly compiler gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: packages/three-assembly-compiler/package-lock.json
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Python production contracts
+        run: pip install -e .
+
+      - name: Install production compiler dependencies
+        run: npm ci --prefix packages/three-assembly-compiler --no-audit --no-fund
+
+      - name: Run production compiler syntax gate
+        run: npm run check --prefix packages/three-assembly-compiler
+
+      - name: Run production compiler tests
+        run: npm test --prefix packages/three-assembly-compiler
+
   test:
     name: pytest Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest

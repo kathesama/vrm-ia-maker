@@ -8,9 +8,20 @@ from typing import Any, TypeVar
 
 from pydantic import ValidationError
 
-from vrm_ia_maker.contracts import AssemblyManifest, AssetPackManifest, CompiledAssemblySpec
+from vrm_ia_maker.contracts import (
+    AssemblyManifest,
+    AssetPackManifest,
+    BaseModelAdapterManifest,
+    CompiledAssemblySpec,
+)
 
-ManifestT = TypeVar("ManifestT", AssetPackManifest, AssemblyManifest, CompiledAssemblySpec)
+ManifestT = TypeVar(
+    "ManifestT",
+    AssetPackManifest,
+    AssemblyManifest,
+    BaseModelAdapterManifest,
+    CompiledAssemblySpec,
+)
 
 
 class ManifestIOError(OSError):
@@ -36,6 +47,11 @@ def load_asset_pack_manifest(path: Path) -> AssetPackManifest:
 def load_assembly_manifest(path: Path) -> AssemblyManifest:
     """Load and validate an assembly manifest from a JSON file."""
     return _load_manifest(path, AssemblyManifest)
+
+
+def load_base_model_adapter_manifest(path: Path) -> BaseModelAdapterManifest:
+    """Load and validate a base-model adapter manifest from a JSON file."""
+    return _load_manifest(path, BaseModelAdapterManifest)
 
 
 def load_compiled_assembly_spec(path: Path) -> CompiledAssemblySpec:

@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "adapter_id": "cross-runtime-adapter",
+  "adapter_version": "1.0.0",
+  "base_asset_id": "base-v1",
+  "bones": {
+    "hips": "hips",
+    "head": "head"
+  },
+  "expression_map": {
+    "blink": [{ "shape_key": "blink", "weight": 1.0 }],
+    "aa": [{ "shape_key": "aa", "weight": 0.8 }]
+  },
+  "look_at": {
+    "horizontal_inner_degrees": 15.0,
+    "horizontal_outer_degrees": 30.0,
+    "vertical_down_degrees": 10.0,
+    "vertical_up_degrees": 12.0
+  }
+}

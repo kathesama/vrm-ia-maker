@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "pack_id": "cross-runtime-pack",
+  "provenance": {
+    "author": "Repository fixture",
+    "source": "generated test data",
+    "license": "CC0-1.0",
+    "commercial_use": true,
+    "modification_allowed": true,
+    "redistribution_allowed": true
+  },
+  "base_asset": {
+    "asset_id": "base-v1",
+    "path": "assets/base.glb",
+    "object_name": "Armature",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "byte_length": 100,
+    "required_objects": ["Armature", "Body"],
+    "required_bones": ["hips", "head"],
+    "required_expressions": ["blink", "aa"]
+  },
+  "components": [
+    {
+      "asset_id": "hair-v1",
+      "slot": "hair",
+      "kind": "rigid_attachment",
+      "path": "assets/hair.glb",
+      "object_name": "Hair",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "byte_length": 20,
+      "required": true,
+      "attachment_bone": "head",
+      "material_names": ["Hair_Primary"]
+    },
+    {
+      "asset_id": "accessory-v1",
+      "slot": "accessory",
+      "kind": "rigid_attachment",
+      "path": "assets/accessory.glb",
+      "object_name": "Brooch",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "byte_length": 10,
+      "required": false,
+      "attachment_bone": "head",
+      "material_names": ["Accessory_Primary"]
+    }
+  ]
+}

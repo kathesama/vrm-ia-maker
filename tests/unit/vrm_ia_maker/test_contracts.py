@@ -10,6 +10,7 @@ from pydantic import ValidationError
 from vrm_ia_maker.contracts import (
     AssemblyManifest,
     AssetPackManifest,
+    BaseModelAdapterManifest,
     CompiledAssemblySpec,
 )
 
@@ -80,6 +81,70 @@ def metadata() -> dict[str, object]:
         "commercial_use": True,
         "redistribution": True,
     }
+
+
+def base_adapter_payload() -> dict[str, object]:
+    return {
+        "schema_version": "1.0",
+        "adapter_id": "procedural-base-adapter",
+        "adapter_version": "1.0.0",
+        "base_asset_id": "base-v1",
+        "bones": {"hips": "hips", "head": "head"},
+        "expression_map": {
+            "blink": [{"shape_key": "blink", "weight": 1.0}],
+            "aa": [{"shape_key": "aa", "weight": 1.0}],
+        },
+        "look_at": {
+            "horizontal_inner_degrees": 15.0,
+            "horizontal_outer_degrees": 15.0,
+            "vertical_down_degrees": 10.0,
+            "vertical_up_degrees": 10.0,
+        },
+    }
+
+
+def test_base_model_adapter_manifest_accepts_versioned_vrm_mappings() -> None:
+    adapter = BaseModelAdapterManifest.model_validate(base_adapter_payload())
+
+    assert adapter.adapter_id == "procedural-base-adapter"
+    assert adapter.bones["head"] == "head"
+    assert adapter.expression_map["blink"][0].shape_key == "blink"
+    assert adapter.look_at.vertical_up_degrees == 10.0
+
+
+@pytest.mark.parametrize(
+    ("field_name", "invalid_value"),
+    [
+        ("adapter_version", ""),
+        ("bones", {}),
+        ("expression_map", {}),
+    ],
+)
+def test_base_model_adapter_manifest_rejects_incomplete_mappings(
+    field_name: str,
+    invalid_value: object,
+) -> None:
+    payload = base_adapter_payload()
+    payload[field_name] = invalid_value
+
+    with pytest.raises(ValidationError):
+        BaseModelAdapterManifest.model_validate(payload)
+
+
+def test_base_model_adapter_manifest_rejects_invalid_expression_weight() -> None:
+    payload = base_adapter_payload()
+    payload["expression_map"]["blink"][0]["weight"] = 1.1  # type: ignore[index]
+
+    with pytest.raises(ValidationError, match="less than or equal to 1"):
+        BaseModelAdapterManifest.model_validate(payload)
+
+
+def test_base_model_adapter_manifest_requires_complete_look_at_limits() -> None:
+    payload = base_adapter_payload()
+    del payload["look_at"]["vertical_up_degrees"]  # type: ignore[index]
+
+    with pytest.raises(ValidationError, match="vertical_up_degrees"):
+        BaseModelAdapterManifest.model_validate(payload)
 
 
 def test_asset_pack_accepts_traceable_modular_assets() -> None:
@@ -197,11 +262,74 @@ def compiled_payload() -> dict[str, object]:
     }
 
 
+def compiled_payload_1_1() -> dict[str, object]:
+    payload = compiled_payload()
+    payload.update(
+        {
+            "schema_version": "1.1",
+            "base_adapter_id": "procedural-base-adapter",
+            "base_adapter_version": "1.0.0",
+        }
+    )
+    payload["vrm_spec"]["look_at"] = base_adapter_payload()["look_at"]  # type: ignore[index]
+    return payload
+
+
 def test_compiled_spec_preserves_provenance() -> None:
     spec = CompiledAssemblySpec.model_validate(compiled_payload())
 
     assert spec.provenance.license == "CC0-1.0"
     assert spec.components[0].slot.value == "hair"
+
+
+def test_compiled_spec_1_1_requires_adapter_traceability() -> None:
+    payload = compiled_payload_1_1()
+
+    spec = CompiledAssemblySpec.model_validate(payload)
+
+    assert spec.base_adapter_id == "procedural-base-adapter"
+    assert spec.base_adapter_version == "1.0.0"
+    assert spec.vrm_spec.look_at.vertical_up_degrees == 10.0
+
+    del payload["base_adapter_version"]
+    with pytest.raises(ValidationError, match="base_adapter_id and base_adapter_version"):
+        CompiledAssemblySpec.model_validate(payload)
+
+
+@pytest.mark.parametrize(
+    "malformed_mapping",
+    ["bones", "expression_map", "look_at", "binding", "weight"],
+)
+def test_compiled_spec_1_1_rejects_malformed_adapter_derived_mappings(
+    malformed_mapping: str,
+) -> None:
+    payload = compiled_payload_1_1()
+    if malformed_mapping == "bones":
+        payload["vrm_spec"]["bones"] = {}  # type: ignore[index]
+    elif malformed_mapping == "expression_map":
+        payload["vrm_spec"]["expression_map"] = {}  # type: ignore[index]
+    elif malformed_mapping == "look_at":
+        del payload["vrm_spec"]["look_at"]["vertical_up_degrees"]  # type: ignore[index]
+    elif malformed_mapping == "binding":
+        payload["vrm_spec"]["expression_map"]["blink"] = [{}]  # type: ignore[index]
+    else:
+        payload["vrm_spec"]["expression_map"]["blink"][0]["weight"] = 1.1  # type: ignore[index]
+
+    with pytest.raises(ValidationError):
+        CompiledAssemblySpec.model_validate(payload)
+
+
+def test_compiled_spec_1_0_rejects_adapter_traceability_fields() -> None:
+    payload = compiled_payload()
+    payload.update(
+        {
+            "base_adapter_id": "procedural-base-adapter",
+            "base_adapter_version": "1.0.0",
+        }
+    )
+
+    with pytest.raises(ValidationError, match="schema 1.1"):
+        CompiledAssemblySpec.model_validate(payload)
 
 
 def test_compiled_spec_rejects_enabled_and_disabled_overlap() -> None:
