@@ -297,11 +297,13 @@ def test_compiled_spec_1_0_preserves_retained_spike_vrm_fields() -> None:
         },
     }
     payload["vrm_spec"].update(legacy_fields)  # type: ignore[union-attr]
+    payload["components"][0].pop("sha256")  # type: ignore[index]
     payload["components"][0]["bone_names"] = ["head"]  # type: ignore[index]
 
     spec = CompiledAssemblySpec.model_validate(payload)
 
     assert spec.vrm_spec.model_extra == legacy_fields
+    assert spec.components[0].sha256 is None
     assert spec.components[0].model_extra == {"bone_names": ["head"]}
 
 
@@ -346,7 +348,7 @@ def test_compiled_spec_1_1_rejects_legacy_component_inspection_fields() -> None:
     payload = compiled_payload_1_1()
     payload["components"][0]["bone_names"] = ["head"]  # type: ignore[index]
 
-    with pytest.raises(ValidationError, match="legacy component inspection fields"):
+    with pytest.raises(ValidationError, match="legacy component payloads"):
         CompiledAssemblySpec.model_validate(payload)
 
 

@@ -185,10 +185,30 @@ class ResolvedComponent(ResolvedAsset):
         return self
 
 
-class LegacyResolvedComponent(ResolvedComponent):
-    """Resolved component retaining spike-only schema 1.0 inspection fields."""
+class LegacyResolvedComponent(StrictModel):
+    """Resolved component retaining spike-only schema 1.0 compatibility."""
 
     model_config = ConfigDict(extra="allow", validate_assignment=True)
+
+    asset_id: NonEmptyString
+    path: Path
+    object_name: NonEmptyString
+    sha256: SHA256 | None = None
+    slot: ComponentSlot
+    kind: ComponentKind
+    attachment_bone: NonEmptyString | None = None
+    required_bones: tuple[NonEmptyString, ...] = ()
+    material_names: tuple[NonEmptyString, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_integration_contract(self) -> LegacyResolvedComponent:
+        """Preserve integration checks for retained schema 1.0 components."""
+        _validate_component_integration_contract(
+            self.kind,
+            self.attachment_bone,
+            self.required_bones,
+        )
+        return self
 
 
 CompiledComponent = Annotated[
@@ -307,9 +327,7 @@ class CompiledAssemblySpec(StrictModel):
         if self.schema_version == "1.1" and any(
             isinstance(component, LegacyResolvedComponent) for component in self.components
         ):
-            raise ValueError(
-                "Compiled assembly schema 1.1 rejects legacy component inspection fields."
-            )
+            raise ValueError("Compiled assembly schema 1.1 rejects legacy component payloads.")
         if self.schema_version == "1.0" and (
             self.base_adapter_id is not None or self.base_adapter_version is not None
         ):
