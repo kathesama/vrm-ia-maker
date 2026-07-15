@@ -1,0 +1,16 @@
+{
+  "name": "@vrm-ia-maker/three-assembly-compiler",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check": "node --check src/compile-assembly.mjs && node --check src/inspect-glb.mjs && node --check src/cli.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "three": "0.183.2"
+  }
+}

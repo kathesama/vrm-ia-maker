@@ -51,3 +51,19 @@ def test_mypy_job_gates_production_and_reports_inherited_baseline() -> None:
     assert inherited_step["run"] == "mypy src/seidr_smidja/"
     assert inherited_step["if"] == "${{ always() }}"
     assert inherited_step["continue-on-error"] is True
+
+
+def test_node_job_gates_the_production_three_assembly_compiler() -> None:
+    node_job = cast(dict[str, Any], _ci_jobs()["three-assembly-compiler"])
+
+    assert node_job.get("continue-on-error", False) is False
+    assert _named_step(node_job, "Set up Node.js 22")["with"]["node-version"] == "22"
+    assert _named_step(node_job, "Install production compiler dependencies")["run"] == (
+        "npm ci --prefix packages/three-assembly-compiler --no-audit --no-fund"
+    )
+    assert _named_step(node_job, "Run production compiler syntax gate")["run"] == (
+        "npm run check --prefix packages/three-assembly-compiler"
+    )
+    assert _named_step(node_job, "Run production compiler tests")["run"] == (
+        "npm test --prefix packages/three-assembly-compiler"
+    )

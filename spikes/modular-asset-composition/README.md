@@ -21,6 +21,18 @@ Blender generates repository-owned modular GLB fixtures
 Three.js owns selection, inspection, and compilation. Blender remains the last
 writer of the distributed `.vrm` file.
 
+## Retained contract boundary
+
+The JSON Schemas under `contracts/`, the original array-shaped assembly examples,
+the spike compiler, and the spike Blender finalizer remain schema 1.0 evidence.
+They are intentionally not the production contract source of truth.
+
+Production manifests are defined by `src/vrm_ia_maker/contracts.py`. The compiler
+under `packages/three-assembly-compiler/` emits schema 1.1 and is exercised in the
+workflow as an additional validated handoff. The schema 1.0 spike compiler outputs
+continue to drive Blender until production finalization is promoted in a separate
+vertical slice.
+
 ## Builds
 
 The workflow produces two avatars from the same asset pack:

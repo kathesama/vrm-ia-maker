@@ -6,7 +6,15 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Annotated, Literal
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, HttpUrl, model_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    StrictBool,
+    model_validator,
+)
 
 SHA256 = Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
 NonEmptyString = Annotated[str, Field(min_length=1)]
@@ -93,7 +101,7 @@ class ComponentAsset(AssetReference):
 
     slot: ComponentSlot
     kind: ComponentKind
-    required: bool = False
+    required: StrictBool = False
     attachment_bone: NonEmptyString | None = None
     required_bones: tuple[NonEmptyString, ...] = ()
     material_names: tuple[NonEmptyString, ...] = ()
@@ -131,7 +139,7 @@ class ComponentSelection(StrictModel):
     """One explicit selection for a singular component slot."""
 
     asset_id: NonEmptyString
-    enabled: bool = True
+    enabled: StrictBool = True
 
 
 class AvatarMetadata(StrictModel):
@@ -185,6 +193,38 @@ class ResolvedComponent(ResolvedAsset):
         return self
 
 
+class LegacyResolvedComponent(StrictModel):
+    """Resolved component retaining spike-only schema 1.0 compatibility."""
+
+    model_config = ConfigDict(extra="allow", validate_assignment=True)
+
+    asset_id: NonEmptyString
+    path: Path
+    object_name: NonEmptyString
+    sha256: SHA256 | None = None
+    slot: ComponentSlot
+    kind: ComponentKind
+    attachment_bone: NonEmptyString | None = None
+    required_bones: tuple[NonEmptyString, ...] = ()
+    material_names: tuple[NonEmptyString, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_integration_contract(self) -> LegacyResolvedComponent:
+        """Preserve integration checks for retained schema 1.0 components."""
+        _validate_component_integration_contract(
+            self.kind,
+            self.attachment_bone,
+            self.required_bones,
+        )
+        return self
+
+
+CompiledComponent = Annotated[
+    ResolvedComponent | LegacyResolvedComponent,
+    Field(union_mode="left_to_right"),
+]
+
+
 class DisabledComponent(StrictModel):
     """Component deliberately excluded from a compiled assembly."""
 
@@ -193,8 +233,60 @@ class DisabledComponent(StrictModel):
     object_name: NonEmptyString
 
 
+class ExpressionBind(StrictModel):
+    """One adapter-provided morph-target binding for a VRM expression."""
+
+    shape_key: NonEmptyString
+    weight: Annotated[float, Field(ge=0.0, le=1.0)]
+
+
+ExpressionBindings = Annotated[tuple[ExpressionBind, ...], Field(min_length=1)]
+
+
+class LookAtSpec(StrictModel):
+    """Base-specific look-at limits copied into the Blender-facing build spec."""
+
+    horizontal_inner_degrees: Annotated[float, Field(ge=0.0)]
+    horizontal_outer_degrees: Annotated[float, Field(ge=0.0)]
+    vertical_down_degrees: Annotated[float, Field(ge=0.0)]
+    vertical_up_degrees: Annotated[float, Field(ge=0.0)]
+
+
+class BaseModelAdapterManifest(StrictModel):
+    """Versioned base-specific mappings consumed by assembly compilation."""
+
+    schema_version: Literal["1.0"] = "1.0"
+    adapter_id: NonEmptyString
+    adapter_version: NonEmptyString
+    base_asset_id: NonEmptyString
+    bones: Annotated[dict[NonEmptyString, NonEmptyString], Field(min_length=1)]
+    expression_map: Annotated[
+        dict[NonEmptyString, ExpressionBindings],
+        Field(min_length=1),
+    ]
+    look_at: LookAtSpec
+
+
 class VrmBuildSpec(StrictModel):
-    """Blender-facing VRM configuration retained as an explicit payload."""
+    """Strict Blender-facing VRM configuration emitted by schema 1.1 compilers."""
+
+    spec_version: Literal["1.0"] = "1.0"
+    avatar_id: NonEmptyString
+    display_name: NonEmptyString
+    base_asset_id: NonEmptyString
+    bones: Annotated[dict[NonEmptyString, NonEmptyString], Field(min_length=1)]
+    expression_map: Annotated[
+        dict[NonEmptyString, ExpressionBindings],
+        Field(min_length=1),
+    ]
+    look_at: LookAtSpec
+    metadata: AvatarMetadata
+
+
+class LegacyVrmBuildSpec(StrictModel):
+    """Loose VRM payload retained only for compiled schema 1.0 compatibility."""
+
+    model_config = ConfigDict(extra="allow", validate_assignment=True)
 
     spec_version: Literal["1.0"] = "1.0"
     avatar_id: NonEmptyString
@@ -209,16 +301,49 @@ class VrmBuildSpec(StrictModel):
 class CompiledAssemblySpec(StrictModel):
     """Validated, resolved handoff from composition to Blender finalization."""
 
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["1.0", "1.1"] = "1.0"
     character_id: NonEmptyString
     display_name: NonEmptyString
     asset_pack_id: NonEmptyString
+    base_adapter_id: NonEmptyString | None = None
+    base_adapter_version: NonEmptyString | None = None
     provenance: Provenance
     base_asset: ResolvedAsset
-    components: tuple[ResolvedComponent, ...]
+    components: tuple[CompiledComponent, ...]
     disabled_components: tuple[DisabledComponent, ...]
     material_overrides: dict[NonEmptyString, HexColor]
-    vrm_spec: VrmBuildSpec
+    vrm_spec: Annotated[
+        VrmBuildSpec | LegacyVrmBuildSpec,
+        Field(union_mode="left_to_right"),
+    ]
+
+    @model_validator(mode="after")
+    def validate_adapter_traceability(self) -> CompiledAssemblySpec:
+        """Require adapter identity for schema 1.1 compiled specifications."""
+        if self.schema_version == "1.1" and (
+            self.base_adapter_id is None or self.base_adapter_version is None
+        ):
+            raise ValueError(
+                "Compiled assembly schema 1.1 requires "
+                "base_adapter_id and base_adapter_version."
+            )
+        if self.schema_version == "1.1" and not isinstance(self.vrm_spec, VrmBuildSpec):
+            raise ValueError(
+                "Compiled assembly schema 1.1 requires strict expression_map "
+                "and look_at mappings."
+            )
+        if self.schema_version == "1.1" and any(
+            isinstance(component, LegacyResolvedComponent) for component in self.components
+        ):
+            raise ValueError("Compiled assembly schema 1.1 rejects legacy component payloads.")
+        if self.schema_version == "1.0" and (
+            self.base_adapter_id is not None or self.base_adapter_version is not None
+        ):
+            raise ValueError(
+                "Adapter traceability fields are available only in compiled assembly "
+                "schema 1.1."
+            )
+        return self
 
     @model_validator(mode="after")
     def validate_component_slots(self) -> CompiledAssemblySpec:
