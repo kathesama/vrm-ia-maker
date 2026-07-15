@@ -179,6 +179,14 @@ def test_asset_pack_rejects_duplicate_asset_identifiers() -> None:
         AssetPackManifest.model_validate(payload)
 
 
+def test_asset_pack_rejects_string_required_flag() -> None:
+    payload = asset_pack_payload()
+    payload["components"][0]["required"] = "false"  # type: ignore[index]
+
+    with pytest.raises(ValidationError, match="boolean"):
+        AssetPackManifest.model_validate(payload)
+
+
 def test_assembly_manifest_rejects_unknown_fields() -> None:
     payload = {
         "schema_version": "1.0",
@@ -213,6 +221,22 @@ def test_assembly_manifest_rejects_invalid_material_override_color() -> None:
     }
 
     with pytest.raises(ValidationError, match="#RRGGBB"):
+        AssemblyManifest.model_validate(payload)
+
+
+def test_assembly_manifest_rejects_string_enabled_flag() -> None:
+    payload = {
+        "schema_version": "1.0",
+        "character_id": "juana",
+        "display_name": "Juana",
+        "asset_pack_id": "juana-test-pack",
+        "selections": {
+            "hair": {"asset_id": "hair-v1", "enabled": "false"},
+        },
+        "metadata": metadata(),
+    }
+
+    with pytest.raises(ValidationError, match="boolean"):
         AssemblyManifest.model_validate(payload)
 
 

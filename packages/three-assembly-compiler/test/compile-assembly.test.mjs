@@ -219,6 +219,26 @@ test("treats an omitted selection enabled flag as true", async () => {
   );
 });
 
+test("rejects a non-boolean selection enabled flag", async () => {
+  const fixture = createFixture();
+  fixture.assembly.selections.accessory.enabled = "false";
+
+  await assert.rejects(
+    () => compileAssembly(fixture),
+    /Selection accessory enabled must be a boolean/u,
+  );
+});
+
+test("rejects a non-boolean component required flag", async () => {
+  const fixture = createFixture();
+  fixture.assetPack.components[2].required = "false";
+
+  await assert.rejects(
+    () => compileAssembly(fixture),
+    /Component accessory-v1 required must be a boolean/u,
+  );
+});
+
 test("defaults omitted material overrides to an empty map", async () => {
   const fixture = createFixture();
   delete fixture.assembly.material_overrides;

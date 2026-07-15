@@ -6,7 +6,15 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Annotated, Literal
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, HttpUrl, model_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    StrictBool,
+    model_validator,
+)
 
 SHA256 = Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
 NonEmptyString = Annotated[str, Field(min_length=1)]
@@ -93,7 +101,7 @@ class ComponentAsset(AssetReference):
 
     slot: ComponentSlot
     kind: ComponentKind
-    required: bool = False
+    required: StrictBool = False
     attachment_bone: NonEmptyString | None = None
     required_bones: tuple[NonEmptyString, ...] = ()
     material_names: tuple[NonEmptyString, ...] = ()
@@ -131,7 +139,7 @@ class ComponentSelection(StrictModel):
     """One explicit selection for a singular component slot."""
 
     asset_id: NonEmptyString
-    enabled: bool = True
+    enabled: StrictBool = True
 
 
 class AvatarMetadata(StrictModel):

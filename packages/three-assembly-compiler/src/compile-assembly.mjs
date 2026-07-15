@@ -10,6 +10,14 @@ function requireMembers(actualValues, requiredValues, label) {
   }
 }
 
+function resolveBoolean(value, defaultValue, label) {
+  const resolved = value === undefined ? defaultValue : value;
+  if (typeof resolved !== "boolean") {
+    throw new Error(`${label} must be a boolean.`);
+  }
+  return resolved;
+}
+
 function resolvedSkinBones(skinnedMeshes, objectName) {
   if (skinnedMeshes instanceof Map) {
     return skinnedMeshes.get(objectName);
@@ -76,13 +84,18 @@ function resolveSelections(assetPack, assembly) {
           `but the asset belongs to ${component.slot}.`,
       );
     }
-    const enabled = selection.enabled ?? true;
+    const enabled = resolveBoolean(selection.enabled, true, `Selection ${slot} enabled`);
     (enabled ? selected : disabled).push(component);
   }
 
   const selectedIds = new Set(selected.map((component) => component.asset_id));
   for (const component of assetPack.components) {
-    if (component.required && !selectedIds.has(component.asset_id)) {
+    const required = resolveBoolean(
+      component.required,
+      false,
+      `Component ${component.asset_id} required`,
+    );
+    if (required && !selectedIds.has(component.asset_id)) {
       throw new Error(`Required component ${component.asset_id} must be selected and enabled.`);
     }
   }
