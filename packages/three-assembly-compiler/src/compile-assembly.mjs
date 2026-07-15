@@ -33,10 +33,13 @@ function verifyIntegrity(asset, inspection) {
 }
 
 function validateManifestRelationships(assetPack, assembly, baseAdapter) {
+  const assetPackVersion = assetPack.schema_version ?? SUPPORTED_MANIFEST_VERSION;
+  const assemblyVersion = assembly.schema_version ?? SUPPORTED_MANIFEST_VERSION;
+  const adapterVersion = baseAdapter.schema_version ?? SUPPORTED_MANIFEST_VERSION;
   if (
-    assetPack.schema_version !== SUPPORTED_MANIFEST_VERSION ||
-    assembly.schema_version !== SUPPORTED_MANIFEST_VERSION ||
-    baseAdapter.schema_version !== SUPPORTED_MANIFEST_VERSION
+    assetPackVersion !== SUPPORTED_MANIFEST_VERSION ||
+    assemblyVersion !== SUPPORTED_MANIFEST_VERSION ||
+    adapterVersion !== SUPPORTED_MANIFEST_VERSION
   ) {
     throw new Error("Asset pack, assembly, and base adapter must use schema_version 1.0.");
   }
@@ -73,7 +76,8 @@ function resolveSelections(assetPack, assembly) {
           `but the asset belongs to ${component.slot}.`,
       );
     }
-    (selection.enabled ? selected : disabled).push(component);
+    const enabled = selection.enabled ?? true;
+    (enabled ? selected : disabled).push(component);
   }
 
   const selectedIds = new Set(selected.map((component) => component.asset_id));
@@ -220,7 +224,8 @@ export async function compileAssembly({
     return createResolvedComponent(component, record.assetPath);
   });
 
-  const unknownMaterials = Object.keys(assembly.material_overrides).filter(
+  const materialOverrides = assembly.material_overrides ?? {};
+  const unknownMaterials = Object.keys(materialOverrides).filter(
     (materialName) => !availableMaterials.has(materialName),
   );
   if (unknownMaterials.length > 0) {
@@ -250,7 +255,7 @@ export async function compileAssembly({
     },
     components: resolvedComponents,
     disabled_components: disabledComponents,
-    material_overrides: assembly.material_overrides,
+    material_overrides: materialOverrides,
     vrm_spec: {
       spec_version: "1.0",
       avatar_id: assembly.character_id,

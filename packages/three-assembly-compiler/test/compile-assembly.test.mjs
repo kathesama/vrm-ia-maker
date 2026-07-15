@@ -207,6 +207,38 @@ test("compiles enabled and disabled selections using adapter mappings", async ()
   assert.deepEqual(result.compiledSpec.vrm_spec.look_at, fixture.baseAdapter.look_at);
 });
 
+test("treats an omitted selection enabled flag as true", async () => {
+  const fixture = createFixture();
+  delete fixture.assembly.selections.hair.enabled;
+
+  const result = await compileAssembly(fixture);
+
+  assert.deepEqual(
+    result.compiledSpec.components.map((component) => component.asset_id),
+    ["hair-v1", "outfit-v1"],
+  );
+});
+
+test("defaults omitted material overrides to an empty map", async () => {
+  const fixture = createFixture();
+  delete fixture.assembly.material_overrides;
+
+  const result = await compileAssembly(fixture);
+
+  assert.deepEqual(result.compiledSpec.material_overrides, {});
+});
+
+test("honors omitted schema version defaults", async () => {
+  const fixture = createFixture();
+  delete fixture.assetPack.schema_version;
+  delete fixture.assembly.schema_version;
+  delete fixture.baseAdapter.schema_version;
+
+  const result = await compileAssembly(fixture);
+
+  assert.equal(result.compiledSpec.schema_version, "1.1");
+});
+
 const selectionFailures = [
   {
     name: "rejects an asset-pack identifier mismatch",
