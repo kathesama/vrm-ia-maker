@@ -98,6 +98,32 @@ test("refuses existing output without replacing it", async (context) => {
   assert.equal(await pathExists(fixture.inspectionPath), false);
 });
 
+test("preserves an output created after the initial no-clobber check", async (context) => {
+  const fixture = await createCliFixture(context);
+  const lateOutput = "created by another process\n";
+
+  await assert.rejects(
+    () =>
+      runCompilerCli({
+        args: cliArgs(fixture),
+        compile: async () => {
+          await fs.mkdir(path.dirname(fixture.compiledPath), { recursive: true });
+          await fs.writeFile(fixture.compiledPath, lateOutput, "utf8");
+          return {
+            compiledSpec: { schema_version: "1.1", character_id: "fixture" },
+            inspection: { compiler: "fixture-inspector" },
+          };
+        },
+        inspectAsset: async () => ({}),
+      }),
+    /EEXIST|already exists/u,
+  );
+
+  assert.equal(await fs.readFile(fixture.compiledPath, "utf8"), lateOutput);
+  assert.equal(await pathExists(fixture.inspectionPath), false);
+  assert.deepEqual(await fs.readdir(path.dirname(fixture.compiledPath)), ["compiled.json"]);
+});
+
 test("leaves no output or temporary files after compiler failure", async (context) => {
   const fixture = await createCliFixture(context);
 

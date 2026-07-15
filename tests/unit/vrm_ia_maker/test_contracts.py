@@ -282,6 +282,29 @@ def test_compiled_spec_preserves_provenance() -> None:
     assert spec.components[0].slot.value == "hair"
 
 
+def test_compiled_spec_1_0_preserves_retained_spike_vrm_fields() -> None:
+    payload = compiled_payload()
+    legacy_fields = {
+        "body": {"height_scale": 1.0},
+        "face": {"skin_color": {"r": 0.72, "g": 0.42, "b": 0.30}},
+        "hair": {"color": {"r": 0.17, "g": 0.11, "b": 0.15}},
+        "tint_blend": {"hair": 1.0, "skin": 0.0, "eye": 0.0},
+        "subsurface_scattering": {"enabled": False},
+        "assembly_manifest": {
+            "schema_version": "1.0",
+            "selected_assets": ["hair-v1"],
+            "disabled_assets": ["brooch-v1"],
+        },
+    }
+    payload["vrm_spec"].update(legacy_fields)  # type: ignore[union-attr]
+    payload["components"][0]["bone_names"] = ["head"]  # type: ignore[index]
+
+    spec = CompiledAssemblySpec.model_validate(payload)
+
+    assert spec.vrm_spec.model_extra == legacy_fields
+    assert spec.components[0].model_extra == {"bone_names": ["head"]}
+
+
 def test_compiled_spec_1_1_requires_adapter_traceability() -> None:
     payload = compiled_payload_1_1()
 
@@ -316,6 +339,14 @@ def test_compiled_spec_1_1_rejects_malformed_adapter_derived_mappings(
         payload["vrm_spec"]["expression_map"]["blink"][0]["weight"] = 1.1  # type: ignore[index]
 
     with pytest.raises(ValidationError):
+        CompiledAssemblySpec.model_validate(payload)
+
+
+def test_compiled_spec_1_1_rejects_legacy_component_inspection_fields() -> None:
+    payload = compiled_payload_1_1()
+    payload["components"][0]["bone_names"] = ["head"]  # type: ignore[index]
+
+    with pytest.raises(ValidationError, match="legacy component inspection fields"):
         CompiledAssemblySpec.model_validate(payload)
 
 

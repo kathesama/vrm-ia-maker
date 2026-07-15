@@ -85,10 +85,14 @@ async function writeOutputsAtomically(compiledPath, inspectionPath, result) {
         { encoding: "utf8", flag: "wx" },
       ),
     ]);
-    await fs.rename(compiledTemporaryPath, compiledPath);
+    await fs.link(compiledTemporaryPath, compiledPath);
     compiledCreated = true;
-    await fs.rename(inspectionTemporaryPath, inspectionPath);
+    await fs.link(inspectionTemporaryPath, inspectionPath);
     inspectionCreated = true;
+    await Promise.all([
+      fs.rm(compiledTemporaryPath),
+      fs.rm(inspectionTemporaryPath),
+    ]);
   } catch (error) {
     await Promise.allSettled([
       fs.rm(compiledTemporaryPath, { force: true }),

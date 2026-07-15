@@ -161,7 +161,7 @@ jobs:
             "$BUILD_DIR/production-compiled-with-accessory.json" \
             "$BUILD_DIR/production-three-inspection-with-accessory.json"
 
-      - name: Validate production compiled specifications
+      - name: Validate retained and production compiled specifications
         shell: bash
         run: |
           set -euo pipefail
@@ -172,6 +172,12 @@ jobs:
           from vrm_ia_maker import load_compiled_assembly_spec
 
           root = Path(os.environ["BUILD_DIR"])
+          retained_without_accessory = load_compiled_assembly_spec(
+              root / "compiled-without-accessory.json"
+          )
+          retained_with_accessory = load_compiled_assembly_spec(
+              root / "compiled-with-accessory.json"
+          )
           without_accessory = load_compiled_assembly_spec(
               root / "production-compiled-without-accessory.json"
           )
@@ -182,6 +188,10 @@ jobs:
               raise SystemExit("Production compiler did not emit schema 1.1.")
           if with_accessory.base_adapter_id != "modular-spike-base-adapter":
               raise SystemExit("Production compiler did not preserve adapter identity.")
+          if retained_without_accessory.schema_version != "1.0":
+              raise SystemExit("Retained compiler did not emit schema 1.0.")
+          if retained_with_accessory.vrm_spec.model_extra is None:
+              raise SystemExit("Retained schema 1.0 VRM fields were not preserved.")
           PY
 
       - name: Run negative assembly contracts

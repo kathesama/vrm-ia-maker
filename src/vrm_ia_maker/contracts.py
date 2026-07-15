@@ -185,6 +185,18 @@ class ResolvedComponent(ResolvedAsset):
         return self
 
 
+class LegacyResolvedComponent(ResolvedComponent):
+    """Resolved component retaining spike-only schema 1.0 inspection fields."""
+
+    model_config = ConfigDict(extra="allow", validate_assignment=True)
+
+
+CompiledComponent = Annotated[
+    ResolvedComponent | LegacyResolvedComponent,
+    Field(union_mode="left_to_right"),
+]
+
+
 class DisabledComponent(StrictModel):
     """Component deliberately excluded from a compiled assembly."""
 
@@ -246,6 +258,8 @@ class VrmBuildSpec(StrictModel):
 class LegacyVrmBuildSpec(StrictModel):
     """Loose VRM payload retained only for compiled schema 1.0 compatibility."""
 
+    model_config = ConfigDict(extra="allow", validate_assignment=True)
+
     spec_version: Literal["1.0"] = "1.0"
     avatar_id: NonEmptyString
     display_name: NonEmptyString
@@ -267,7 +281,7 @@ class CompiledAssemblySpec(StrictModel):
     base_adapter_version: NonEmptyString | None = None
     provenance: Provenance
     base_asset: ResolvedAsset
-    components: tuple[ResolvedComponent, ...]
+    components: tuple[CompiledComponent, ...]
     disabled_components: tuple[DisabledComponent, ...]
     material_overrides: dict[NonEmptyString, HexColor]
     vrm_spec: Annotated[
@@ -289,6 +303,12 @@ class CompiledAssemblySpec(StrictModel):
             raise ValueError(
                 "Compiled assembly schema 1.1 requires strict expression_map "
                 "and look_at mappings."
+            )
+        if self.schema_version == "1.1" and any(
+            isinstance(component, LegacyResolvedComponent) for component in self.components
+        ):
+            raise ValueError(
+                "Compiled assembly schema 1.1 rejects legacy component inspection fields."
             )
         if self.schema_version == "1.0" and (
             self.base_adapter_id is not None or self.base_adapter_version is not None
