@@ -295,18 +295,38 @@ for (const scenario of selectionFailures) {
 
 test("checks integrity for every catalog asset and structure only where required", async () => {
   const fixture = createFixture();
+  const allowedRoot = path.dirname(fixture.assetPackPath);
 
   await compileAssembly(fixture);
 
   assert.deepEqual(
     fixture.inspectionCalls.map(({ assetPath, options }) => [path.basename(assetPath), options]),
     [
-      ["base.glb", { structural: true }],
-      ["hair.glb", { structural: true }],
-      ["outfit.glb", { structural: true }],
-      ["accessory.glb", { structural: false }],
+      ["base.glb", { structural: true, allowedRoot }],
+      ["hair.glb", { structural: true, allowedRoot }],
+      ["outfit.glb", { structural: true, allowedRoot }],
+      ["accessory.glb", { structural: false, allowedRoot }],
     ],
   );
+});
+
+test("does not constrain explicit absolute asset paths to the pack root", async () => {
+  const fixture = createFixture();
+  const component = fixture.assetPack.components[2];
+  const originalPath = path.join(
+    path.dirname(fixture.assetPackPath),
+    component.path,
+  );
+  const absolutePath = path.resolve("external-assets", "accessory.glb");
+  const inspection = fixture.inspections.get(originalPath);
+  fixture.inspections.delete(originalPath);
+  fixture.inspections.set(absolutePath, inspection);
+  component.path = absolutePath;
+
+  await compileAssembly(fixture);
+
+  const call = fixture.inspectionCalls.find(({ assetPath }) => assetPath === absolutePath);
+  assert.deepEqual(call?.options, { structural: false, allowedRoot: null });
 });
 
 const integrationFailures = [

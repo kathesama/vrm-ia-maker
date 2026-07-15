@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import process from "node:process";
 import test from "node:test";
 
 import { inspectGlb } from "../src/inspect-glb.mjs";
@@ -108,6 +109,33 @@ test("reads integrity metadata without parsing an unselected GLB", async (contex
   assert.deepEqual(inspection.morphTargets, []);
   assert.deepEqual(inspection.materialNames, []);
   assert.deepEqual(inspection.skinnedMeshes, {});
+});
+
+test("rejects a relative asset symlinked outside its allowed root", async (context) => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "three-assembly-inspector-"));
+  context.after(() => fs.rm(directory, { recursive: true, force: true }));
+  const packDirectory = path.join(directory, "pack");
+  const outsideDirectory = path.join(directory, "outside");
+  const linkedAssetsDirectory = path.join(packDirectory, "assets");
+  await Promise.all([
+    fs.mkdir(packDirectory, { recursive: true }),
+    fs.mkdir(outsideDirectory, { recursive: true }),
+  ]);
+  await fs.writeFile(path.join(outsideDirectory, "outside.glb"), "outside pack", "utf8");
+  await fs.symlink(
+    outsideDirectory,
+    linkedAssetsDirectory,
+    process.platform === "win32" ? "junction" : "dir",
+  );
+
+  await assert.rejects(
+    () =>
+      inspectGlb(path.join(linkedAssetsDirectory, "outside.glb"), {
+        structural: false,
+        allowedRoot: packDirectory,
+      }),
+    /resolves outside the asset-pack directory/u,
+  );
 });
 
 test("uses Three.js to inspect selected GLB structure", async (context) => {

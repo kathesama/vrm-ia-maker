@@ -193,6 +193,7 @@ export async function compileAssembly({
   const { selected, disabled } = resolveSelections(assetPack, assembly);
   const selectedIds = new Set(selected.map((component) => component.asset_id));
   const allAssets = [assetPack.base_asset, ...assetPack.components];
+  const assetPackRoot = path.dirname(path.resolve(assetPackPath));
   const inspections = new Map();
   const integrityReports = [];
 
@@ -200,7 +201,8 @@ export async function compileAssembly({
     const assetPath = resolveAssetPath(assetPackPath, asset.path);
     const structural =
       asset.asset_id === assetPack.base_asset.asset_id || selectedIds.has(asset.asset_id);
-    const inspection = await inspectAsset(assetPath, { structural });
+    const allowedRoot = path.isAbsolute(asset.path) ? null : assetPackRoot;
+    const inspection = await inspectAsset(assetPath, { structural, allowedRoot });
     verifyIntegrity(asset, inspection);
     inspections.set(asset.asset_id, { assetPath, inspection });
     integrityReports.push({

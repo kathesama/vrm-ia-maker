@@ -31,6 +31,25 @@ function emptyStructure() {
   };
 }
 
+async function resolveContainedPath(filePath, allowedRoot) {
+  if (!allowedRoot) {
+    return filePath;
+  }
+  const [realRoot, realFilePath] = await Promise.all([
+    fs.realpath(allowedRoot),
+    fs.realpath(filePath),
+  ]);
+  const relative = path.relative(realRoot, realFilePath);
+  if (
+    relative === ".." ||
+    relative.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relative)
+  ) {
+    throw new Error(`Relative asset path resolves outside the asset-pack directory: ${filePath}.`);
+  }
+  return realFilePath;
+}
+
 function inspectScene(scene) {
   const objectNames = new Set();
   const boneNames = new Set();
@@ -75,8 +94,9 @@ function inspectScene(scene) {
   };
 }
 
-export async function inspectGlb(filePath, { structural = true } = {}) {
-  const bytes = await fs.readFile(filePath);
+export async function inspectGlb(filePath, { structural = true, allowedRoot = null } = {}) {
+  const physicalPath = await resolveContainedPath(filePath, allowedRoot);
+  const bytes = await fs.readFile(physicalPath);
   const integrity = {
     byteLength: bytes.byteLength,
     sha256: sha256(bytes),
@@ -89,7 +109,7 @@ export async function inspectGlb(filePath, { structural = true } = {}) {
     bytes.byteOffset,
     bytes.byteOffset + bytes.byteLength,
   );
-  const resourceRoot = pathToFileURL(`${path.dirname(filePath)}${path.sep}`).href;
+  const resourceRoot = pathToFileURL(`${path.dirname(physicalPath)}${path.sep}`).href;
   try {
     const loader = new GLTFLoader();
     const gltf = await loader.parseAsync(arrayBuffer, resourceRoot);
