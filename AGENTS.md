@@ -48,6 +48,13 @@ project ticket artifacts inside `.sdd-kit/`.
 - `CharacterDesignPackage` will be the canonical visual source of truth:
   multiview references, measurements, landmarks, materials, expressions,
   visemes, hair, outfit, and provenance.
+- Before designing or implementing `CharacterDesignPackage`, read
+  `docs/CHARACTER_DESIGN_PACKAGE.md`. That document defines the required source
+  classes, package layout, quality gates, milestone profiles, and anti-invention
+  rules for missing visual data.
+- A master character sheet is creative canon, not executable geometry. Do not
+  convert perspective art, occluded regions, inconsistent views, or missing
+  measurements into asserted production facts.
 - A compiled base-model specification is derived data. A generated `.vrm` is a
   build artifact; neither replaces the character design package.
 - Three.js owns deterministic avatar runtime behavior: loading, animation,
