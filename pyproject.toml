@@ -113,4 +113,4 @@ select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
-mypy_path = "src"
+mypy_path = ["src", "typings"]
