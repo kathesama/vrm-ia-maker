@@ -51,13 +51,20 @@ def test_ruff_job_gates_production_and_reports_inherited_baseline() -> None:
     assert inherited_step["continue-on-error"] is True
 
 
-def test_mypy_job_gates_production_and_reports_inherited_baseline() -> None:
+def test_mypy_job_gates_production_and_publishes_diagnostics() -> None:
     typecheck_job = cast(dict[str, Any], _ci_jobs()["typecheck"])
 
     assert typecheck_job.get("continue-on-error", False) is False
-    assert _named_step(typecheck_job, "Run production mypy gate")["run"] == (
-        "mypy src/vrm_ia_maker/"
-    )
+    production_step = _named_step(typecheck_job, "Run production mypy gate")
+    assert production_step["shell"] == "bash"
+    assert "set -o pipefail" in production_step["run"]
+    assert "mypy src/vrm_ia_maker/ | tee mypy-production-report.txt" in production_step["run"]
+
+    diagnostics_step = _named_step(typecheck_job, "Upload production mypy diagnostics")
+    assert diagnostics_step["if"] == "${{ always() }}"
+    assert diagnostics_step["uses"] == "actions/upload-artifact@v4"
+    assert diagnostics_step["with"]["name"] == "mypy-production-report"
+    assert diagnostics_step["with"]["path"] == "mypy-production-report.txt"
 
     inherited_step = _named_step(typecheck_job, "Report inherited mypy baseline")
     assert inherited_step["run"] == "mypy src/seidr_smidja/"
