@@ -68,6 +68,38 @@ project ticket artifacts inside `.sdd-kit/`.
 - Keep changes small, surgical, and independently verifiable. Do not prune
   inherited modules until their required behavior has a tested replacement.
 
+## Standing Delegated Execution Authority
+
+Kathy has granted standing authority for autonomous work inside this repository.
+Read and follow `docs/DELEGATED_EXECUTION_POLICY.md` before deciding that a task
+requires another approval prompt.
+
+For in-scope reversible work, that standing authority satisfies the explicit
+approval checkpoint in the SDD workflow. Record this in the ticket plan as:
+
+```text
+Approval source: standing delegated execution authority (GH-20)
+```
+
+Do not stop merely because a plan, issue, branch, commit, pull request, or review
+cycle has been completed. Continue through implementation, validation, review
+repair, merge, branch cleanup, and the next useful vertical slice while a safe
+action remains available.
+
+Ask Kathy only when one of the closed escalation conditions in
+`docs/DELEGATED_EXECUTION_POLICY.md` applies. The existence of several compatible
+implementation options is not itself an escalation. Choose a safe reversible
+default, document it, and proceed.
+
+Approved character references may drive provisional visual builds. Clearly mark
+unmeasured assumptions as provisional; do not promote them to measured facts or
+approved visual canon without evidence or direct visual approval.
+
+Branch-discipline rules in the delegated-execution policy apply only to implementation
+agents. They do not restrict Kathy, as repository owner, from intentionally making a
+direct commit. Agents must treat owner-authored commits as current repository state and
+must not characterize them as agent-policy violations.
+
 ## Mandatory SDD Workflow
 
 Before modifying production code, tests, schemas, build behavior, or service
@@ -80,10 +112,15 @@ configuration:
 4. Create the plan, implementation spec, and changelog in
    `.ai-specs/changes/{TICKET}/`.
 5. Run `sh .sdd-kit/tools/validate-impl-spec.sh {TICKET}`.
-6. Present the plan and stop for explicit `approve`, `change`, or `deny`.
-7. Implement only after `approve`, following RED -> GREEN -> REFACTOR.
+6. Apply the approval rule:
+   - when a closed escalation condition applies, present the plan and stop for
+     explicit `approve`, `change`, or `deny`;
+   - otherwise, record standing approval under GH-20 and continue without asking.
+7. Implement following RED -> GREEN -> REFACTOR.
 8. Run QA, code review, changelog validation, PR report generation, and PR
    content validation before declaring the ticket ready.
+9. Continue through CI, review repair, merge, branch cleanup, and the next slice
+   unless a closed escalation condition is reached.
 
 ## Repository Commands
 
