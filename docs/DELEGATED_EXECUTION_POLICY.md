@@ -45,6 +45,9 @@ Within that repository, the agent is authorized to:
 
 ## Protected integration branches
 
+This section governs implementation agents. It does not restrict the repository owner
+from making direct commits when she intentionally chooses to do so.
+
 Agents must never create or push ordinary work commits directly to `development` or
 `main`.
 
@@ -56,7 +59,7 @@ approved GitHub pull-request merge operation.
 Partial, experimental, failing, or review-incomplete work must remain on its feature or
 recovery branch. It must not be used as an integration checkpoint.
 
-When an accidental direct commit is discovered:
+When an accidental agent-created direct commit is discovered:
 
 1. preserve its exact commit on a recovery branch;
 2. stop further direct pushes;
