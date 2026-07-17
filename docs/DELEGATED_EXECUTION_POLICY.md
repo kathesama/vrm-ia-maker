@@ -68,7 +68,9 @@ When an accidental agent-created direct commit is discovered:
 5. do not hide, amend away, or silently discard the accidental work.
 
 An intentional direct commit authored by Kathy is not an agent-policy violation and
-must not be characterized as accidental agent behavior.
+must not be characterized as accidental agent behavior. Agents must treat owner-authored
+work as current repository state, inspect it, validate it, and continue from it unless a
+real escalation condition applies.
 
 Rewriting shared history remains an escalation condition. Prefer a normal revert or
 reviewable recovery flow unless Kathy explicitly authorizes a force update.
