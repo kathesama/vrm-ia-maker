@@ -233,6 +233,15 @@ class DisabledComponent(StrictModel):
     object_name: NonEmptyString
 
 
+class BuiltComponent(StrictModel):
+    """Component integration recorded by the Blender finalizer."""
+
+    asset_id: NonEmptyString
+    slot: ComponentSlot
+    kind: ComponentKind
+    object_name: NonEmptyString
+
+
 class ExpressionBind(StrictModel):
     """One adapter-provided morph-target binding for a VRM expression."""
 
@@ -356,3 +365,49 @@ class CompiledAssemblySpec(StrictModel):
         if enabled_ids & disabled_ids:
             raise ValueError("A component cannot be both enabled and disabled.")
         return self
+
+
+class BlenderBuildEvidence(StrictModel):
+    """Scene evidence emitted by the production Blender finalizer."""
+
+    schema_version: Literal["1.0"] = "1.0"
+    character_id: NonEmptyString
+    base_adapter_id: NonEmptyString
+    base_adapter_version: NonEmptyString
+    armature_objects: Annotated[
+        tuple[NonEmptyString, ...],
+        Field(min_length=1, max_length=1),
+    ]
+    selected_components: tuple[BuiltComponent, ...]
+    disabled_components: tuple[DisabledComponent, ...]
+    scene_objects_before_export: Annotated[
+        tuple[NonEmptyString, ...],
+        Field(min_length=1),
+    ]
+    humanoid_bones: Annotated[
+        tuple[NonEmptyString, ...],
+        Field(min_length=1),
+    ]
+    expressions: Annotated[
+        tuple[NonEmptyString, ...],
+        Field(min_length=1),
+    ]
+    look_at: LookAtSpec
+    metadata: AvatarMetadata
+
+
+class ForgeBuildReport(StrictModel):
+    """Verified report published beside one production VRM artifact."""
+
+    schema_version: Literal["1.0"] = "1.0"
+    character_id: NonEmptyString
+    display_name: NonEmptyString
+    asset_pack_id: NonEmptyString
+    base_adapter_id: NonEmptyString
+    base_adapter_version: NonEmptyString
+    vrm_path: Path
+    vrm_sha256: SHA256
+    vrm_byte_length: Annotated[int, Field(gt=0)]
+    blender_exit_code: Literal[0]
+    blender_duration_seconds: Annotated[float, Field(ge=0.0)]
+    evidence: BlenderBuildEvidence

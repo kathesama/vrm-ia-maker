@@ -1,6 +1,6 @@
 # Architectural Decision Records — Index
 **Keeper:** Eirwyn Rúnblóm (Scribe) + Rúnhild Svartdóttir (Architect)
-**Last updated:** 2026-07-15
+**Last updated:** 2026-07-17
 
 ---
 
@@ -79,6 +79,8 @@ Proposed  →  Accepted  →  Superseded (by D-NNN)
 | [D-009](D-009-list-assets-and-bootstrap-hoard-cli.md) | `seidr list-assets` Implemented + `seidr bootstrap-hoard` Documented | Accepted | 2026-05-06 | Both deferred D-008 sub-items closed; v0.1.1-pending INTERFACE amendment ratified; AUDIT-003 fully closed |
 | [D-010](D-010-brunhand-feature-genesis.md) | Brúarhönd Feature Genesis (Cross-Machine VRoid Studio Remote Control) | Accepted | 2026-05-06 | Scope (c) ratified — primitives in v0.1, translation deferred to v0.2; lateral dispatch surface; Tailscale ACL + bearer token defense in depth; Skald-named sub-modules (Horfunarþjónn / Hengilherðir / Gæslumaðr / Sjálfsmöguleiki / Ljósbrú / Tengslastig); httpx promoted to base deps |
 | [D-011](D-011-production-threejs-assembly-compiler.md) | Production Three.js Assembly Compiler Boundary | Accepted | 2026-07-15 | Pydantic owns contracts, a versioned adapter owns base mappings, Three.js compiles and inspects, and Blender remains the final VRM writer. |
+| [D-013](D-013-bounded-reference-authoring.md) | Bounded Reference Authoring | Accepted | 2026-07-16 | A fixed human-gated build-time workflow may use one optional online image adapter while sealed packages and downstream builds remain provider-free. |
+| [D-014](D-014-production-blender-forge-boundary.md) | Production Blender Forge Boundary | Accepted | 2026-07-17 | A port-injected Forge validates staged schema 1.1 outputs while Blender remains the final VRM writer and retained spike evidence stays intact. |
 
 ---
 

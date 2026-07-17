@@ -44,6 +44,7 @@ Current direct dependencies include:
 
 - Pydantic
 - PyYAML
+- Pillow
 - Click
 - FastAPI
 - Uvicorn
@@ -55,6 +56,15 @@ Current direct dependencies include:
 - Ruff
 - mypy
 - respx
+
+Pillow is a direct local dependency used to validate PNG dimensions and extract exact
+reference panels. It is not used for artistic or identity decisions.
+
+The OpenAI Python SDK is available only through the optional `authoring-openai` extra.
+It supports explicit build-time image-authoring requests and is not imported by sealed
+package validation, Blender production, Three.js consumption, or avatar runtime code.
+The SDK, hosted service, and generated outputs remain subject to their applicable
+third-party terms; this notice does not grant rights to any input or output image.
 
 Several dependencies support inherited features that are scheduled for removal or conversion to optional extras. Their presence in the current package metadata does not make them part of the target architecture.
 

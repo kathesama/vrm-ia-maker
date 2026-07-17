@@ -77,6 +77,24 @@ The Blender build script itself is not characterized by this slice. Base-specifi
 mesh, bone, material, expression, and export behavior remains
 `NOT_CHARACTERIZED` until the compiler and base-model adapter contracts exist.
 
+## Production Modular Forge Boundary
+
+The production schema 1.1 path is additive to the retained Forge contract:
+
+| Contract | Classification | Evidence |
+|---|---|---|
+| `CompiledAssemblySpec` schema 1.1 and strict `VrmBuildSpec` are the production Blender handoff. | `PRESERVE` | Production contract and finalization unit tests. |
+| Blender emits a staged VRM and strict scene evidence; host Python validates both before publication. | `PRESERVE` | Failure, mismatch, cleanup, and publication tests. |
+| Existing VRM and report targets are never overwritten, including late publication races. | `HARDENED` | Exclusive publication and rollback regression tests. |
+| Humanoid, expression, look-at, and metadata setup has no retained base-map fallback. | `PRESERVE` | Blender adapter source-policy and mapping tests. |
+| `RetainedBlenderRunnerAdapter` is the only production import of the inherited runner. | `REPLACE_LATER` | Removal trigger defined by D-014. |
+
+The retained runner and schema 1.0 spike finalizer must not be deleted while
+preview rendering or another retained caller still depends on the old runner.
+Deletion also requires green production Blender, structural, and Three.js
+evidence after the runner relocation. Procedural parity does not authorize
+removing SPIKE-1 or SPIKE-2 before approved production-asset parity exists.
+
 ## Preview Render Orchestration
 
 | Contract | Classification | Evidence |

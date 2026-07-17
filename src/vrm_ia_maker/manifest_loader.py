@@ -13,6 +13,7 @@ from vrm_ia_maker.contracts import (
     AssetPackManifest,
     BaseModelAdapterManifest,
     CompiledAssemblySpec,
+    ForgeBuildReport,
 )
 
 ManifestT = TypeVar(
@@ -21,6 +22,7 @@ ManifestT = TypeVar(
     AssemblyManifest,
     BaseModelAdapterManifest,
     CompiledAssemblySpec,
+    ForgeBuildReport,
 )
 
 
@@ -57,6 +59,11 @@ def load_base_model_adapter_manifest(path: Path) -> BaseModelAdapterManifest:
 def load_compiled_assembly_spec(path: Path) -> CompiledAssemblySpec:
     """Load and validate a compiled assembly specification from a JSON file."""
     return _load_manifest(path, CompiledAssemblySpec)
+
+
+def load_forge_build_report(path: Path) -> ForgeBuildReport:
+    """Load and validate a production Forge build report from a JSON file."""
+    return _load_manifest(path, ForgeBuildReport)
 
 
 def _load_manifest(path: Path, contract_type: type[ManifestT]) -> ManifestT:

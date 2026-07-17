@@ -581,6 +581,74 @@ approved creative canon
         -> dist/juana/juana.vrm
 ```
 
+## Bounded talking-bust reference authoring
+
+The initial production authoring profile can start from one approved master character
+sheet, including a composite sheet such as
+`examples/Juana-full-concept-white.png`. The master remains creative canon. Generated
+views are technical reference candidates and never become measurements, landmarks, or
+hidden geometry merely because an image provider produced them.
+
+The profile runs these fixed tasks in order:
+
+1. face turnaround;
+2. facial mechanics;
+3. upper-body turnaround;
+4. expressions;
+5. visemes;
+6. hair construction;
+7. outfit construction;
+8. material reference.
+
+Each task has its own versioned prompt, exact PNG size, grid, dependencies, and panel
+destinations. Every request includes only approved predecessor sheets and the master
+character sheet. One explicit `run` command makes at most one provider request, and
+each task allows no more than three recorded attempts. A generated sheet cannot unlock
+its dependents until a named human reviewer approves both the sheet and every
+deterministic panel preview.
+
+If later human direction contradicts an active approval, the reviewer may supersede it
+after every dependent candidate is resolved. Superseding retains the original approval,
+candidate files, hashes, and provenance, marks that candidate as historical, and reopens
+the task within its existing attempt bound. Only the current active approval can enter a
+sealed package. No approval or attempt history is deleted or rewritten.
+
+The internal command surface is:
+
+```text
+python -m vrm_ia_maker.design.cli init ...
+python -m vrm_ia_maker.design.cli set-rights ...
+python -m vrm_ia_maker.design.cli run ...
+python -m vrm_ia_maker.design.cli status ...
+python -m vrm_ia_maker.design.cli approve ...
+python -m vrm_ia_maker.design.cli reject ...
+python -m vrm_ia_maker.design.cli supersede ...
+python -m vrm_ia_maker.design.cli validate ...
+python -m vrm_ia_maker.design.cli seal ...
+```
+
+`set-rights` completes every required master-source rights field on an existing
+workspace and removes only the corresponding blocking gap. Complete rights are
+immutable for that package revision; correcting them requires a new revision rather
+than overwriting legal evidence.
+
+The ignored authoring workspace retains raw and rejected candidates, malformed provider
+output when bytes are returned, candidate prompt identifiers and versions, hashes, error
+details, and decisions for audit. Sealing copies only approved sheets and approved crops
+to a new CharacterDesignPackage destination. It refuses incomplete source rights,
+unresolved visual-seal gaps, changed hashes, unsafe paths, or an existing destination.
+
+Online image generation is optional authoring infrastructure. It is not automatic
+artistic approval, automatic legal clearance, 3D reconstruction, or avatar runtime
+behavior. Once the visual package is sealed, all downstream validation, Three.js work,
+Blender work, and VRM runtime behavior contain no image-provider calls.
+
+Provider moderation failures remain recorded attempts and are never retried
+transparently. A garment-construction candidate may isolate the visible garment on an
+opaque technical mannequin when a realistic worn rendering is rejected, while the
+master remains authoritative for the final worn appearance. That isolation does not
+authorize hidden closures, unseen surfaces, anatomy, or production geometry.
+
 ## Responsibility map
 
 ### CharacterDesignPackage

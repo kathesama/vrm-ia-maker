@@ -29,9 +29,10 @@ They are intentionally not the production contract source of truth.
 
 Production manifests are defined by `src/vrm_ia_maker/contracts.py`. The compiler
 under `packages/three-assembly-compiler/` emits schema 1.1 and is exercised in the
-workflow as an additional validated handoff. The schema 1.0 spike compiler outputs
-continue to drive Blender until production finalization is promoted in a separate
-vertical slice.
+workflow as an additional validated handoff. The schema 1.0 spike compiler and
+finalizer continue to run as retained evidence. The same workflow also sends both
+schema 1.1 variants through the production Forge, structural validator, and
+Three.js validator; neither path replaces the other yet.
 
 ## Builds
 
@@ -39,6 +40,11 @@ The workflow produces two avatars from the same asset pack:
 
 - `modular-without-accessory.vrm`: base + hair + skinned outfit.
 - `modular-with-accessory.vrm`: base + hair + skinned outfit + rigid accessory.
+- `production-modular-without-accessory.vrm`: schema 1.1 production Forge output.
+- `production-modular-with-accessory.vrm`: schema 1.1 production Forge output
+  with the rigid accessory.
+- `production-blender-report-*.json`: strict production build reports paired
+  with the production VRMs.
 
 The validators prove that the optional accessory appears only in the second
 output, while both outputs preserve the same humanoid, expression, and look-at

@@ -27,6 +27,7 @@ jobs:
       BUILD_DIR: build/modular-spike
       BLENDER_ARCHIVE: blender-4.2.0-linux-x64.tar.xz
       BLENDER_DIRECTORY: blender-4.2.0-linux-x64
+      BLENDER_SHA256: 4f4fd7646af01f6fee9d420408318381a6e52571268eb7cf9cd5033bd9e7a359
       VRM_ADDON_URL: https://github.com/saturday06/VRM-Addon-for-Blender/releases/download/v4.4.0/VRM_Addon_for_Blender-4_4_0.zip
       VRM_ADDON_SHA256: 339e2a13b408c9d9d777016857422957a2bc75a5d19a5e70343ae18b33fec748
 
@@ -51,7 +52,7 @@ jobs:
           pip install -e .
           npm ci --prefix packages/three-assembly-compiler --no-audit --no-fund
 
-      - name: Download pinned Blender
+      - name: Download and verify pinned Blender
         shell: bash
         run: |
           set -euo pipefail
@@ -59,6 +60,7 @@ jobs:
           curl --fail --location --retry 3 \
             "https://download.blender.org/release/Blender4.2/${BLENDER_ARCHIVE}" \
             --output "/tmp/${BLENDER_ARCHIVE}"
+          printf '%s  %s\n' "$BLENDER_SHA256" "/tmp/${BLENDER_ARCHIVE}" | sha256sum --check
           tar --extract --file "/tmp/${BLENDER_ARCHIVE}" --directory .tools
           blender_path="$GITHUB_WORKSPACE/.tools/${BLENDER_DIRECTORY}/blender"
           test -x "$blender_path"
@@ -222,6 +224,65 @@ jobs:
             --build-script src/seidr_smidja/forge/scripts/build_avatar.py
           test -s "$BUILD_DIR/modular-with-accessory.vrm"
 
+      - name: Finalize both production schema 1.1 VRMs through Forge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          from vrm_ia_maker import (
+              load_compiled_assembly_spec,
+              load_forge_build_report,
+          )
+          from vrm_ia_maker.forge import (
+              BlenderExecutionConfig,
+              finalize_compiled_assembly,
+          )
+          from vrm_ia_maker.forge.adapters import RetainedBlenderRunnerAdapter
+
+          root = Path(os.environ["BUILD_DIR"])
+          execution_config = BlenderExecutionConfig(
+              executable=Path(os.environ["BLENDER"]),
+              timeout_seconds=300,
+          )
+          executor = RetainedBlenderRunnerAdapter()
+          variants = (
+              (
+                  "production-compiled-without-accessory.json",
+                  "production-modular-without-accessory.vrm",
+                  "production-blender-report-without-accessory.json",
+              ),
+              (
+                  "production-compiled-with-accessory.json",
+                  "production-modular-with-accessory.vrm",
+                  "production-blender-report-with-accessory.json",
+              ),
+          )
+          for compiled_name, output_name, report_name in variants:
+              spec = load_compiled_assembly_spec(root / compiled_name)
+              result = finalize_compiled_assembly(
+                  spec=spec,
+                  output_path=root / output_name,
+                  report_path=root / report_name,
+                  execution_config=execution_config,
+                  executor=executor,
+              )
+              if not result.success:
+                  print(result.stdout)
+                  print(result.stderr)
+                  raise SystemExit(
+                      f"Production Forge finalization failed for {compiled_name}: "
+                      f"{result.error}"
+                  )
+              report = load_forge_build_report(root / report_name)
+              if report.character_id != spec.character_id:
+                  raise SystemExit(
+                      f"Forge report identity mismatch for {compiled_name}."
+                  )
+          PY
+
       - name: Validate modular VRM structures
         run: |
           python spikes/modular-asset-composition/structural_validate.py \
@@ -233,6 +294,17 @@ jobs:
             "$BUILD_DIR/compiled-with-accessory.json" \
             "$BUILD_DIR/structural-with-accessory.json"
 
+      - name: Validate production modular VRM structures
+        run: |
+          python spikes/modular-asset-composition/structural_validate.py \
+            "$BUILD_DIR/production-modular-without-accessory.vrm" \
+            "$BUILD_DIR/production-compiled-without-accessory.json" \
+            "$BUILD_DIR/production-structural-without-accessory.json"
+          python spikes/modular-asset-composition/structural_validate.py \
+            "$BUILD_DIR/production-modular-with-accessory.vrm" \
+            "$BUILD_DIR/production-compiled-with-accessory.json" \
+            "$BUILD_DIR/production-structural-with-accessory.json"
+
       - name: Validate modular VRMs through Three.js
         run: |
           node spikes/modular-asset-composition/three/validate.mjs \
@@ -243,6 +315,17 @@ jobs:
             "$BUILD_DIR/modular-with-accessory.vrm" \
             "$BUILD_DIR/compiled-with-accessory.json" \
             "$BUILD_DIR/threejs-with-accessory.json"
+
+      - name: Validate production modular VRMs through Three.js
+        run: |
+          node spikes/modular-asset-composition/three/validate.mjs \
+            "$BUILD_DIR/production-modular-without-accessory.vrm" \
+            "$BUILD_DIR/production-compiled-without-accessory.json" \
+            "$BUILD_DIR/production-threejs-without-accessory.json"
+          node spikes/modular-asset-composition/three/validate.mjs \
+            "$BUILD_DIR/production-modular-with-accessory.vrm" \
+            "$BUILD_DIR/production-compiled-with-accessory.json" \
+            "$BUILD_DIR/production-threejs-with-accessory.json"
 
       - name: Compare the two assembly outputs
         shell: bash

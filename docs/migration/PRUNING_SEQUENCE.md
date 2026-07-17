@@ -178,13 +178,25 @@ base fixture.
 ### Work
 
 1. move the shared Blender runner;
-2. adapt Forge runner to `CompiledCharacterSpe`;
+2. adapt Forge runner to `CompiledAssemblySpec`;
 3. split generic VRM setup/export from adapter operations;
 4. adapt the renderer and standard views;
 5. adapt the VRM reader and compliance reports;
 6. introduce a Three.js/web target;
 7. replace Annáll requirements with manifest/build-report output, using Null
    telemetry during transition.
+
+### Current production boundary
+
+GH-16 establishes the production Forge boundary for steps 2 and 3 without
+prematurely performing step 1. `RetainedBlenderRunnerAdapter` preserves the
+characterized subprocess behavior while schema 1.1 assembly, VRM setup,
+staged validation, and build-report publication live under `vrm_ia_maker`.
+
+Phase 6 is not complete. The renderer, standard views, production reader,
+public command surface, and licensed Juana assets still require migration.
+The retained runner and spike finalizers remain until the D-014 deletion trigger
+is satisfied; procedural workflow parity alone is insufficient.
 
 ### Exit gate
 

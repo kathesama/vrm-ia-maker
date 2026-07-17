@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "provenance_id": "juana-master-character-sheet-v3",
+  "source_class": "creative_canon",
+  "artifact": {
+    "path": "examples/Juana-full-concept-white.png",
+    "sha256": "63c3510c51545748ae7aa9d1d6b7d909067bcc1d22663f4bf1b91742f6c88a18",
+    "byte_length": 2190515,
+    "width": 1448,
+    "height": 1086
+  },
+  "authoritative_source": "OpenAI ChatGPT image generation directed by Katherine E. Aguirre from her original Juana character concepts.",
+  "rights": {
+    "author": "Katherine E. Aguirre (creative direction; generated with OpenAI ChatGPT)",
+    "rights_holder": "Katherine E. Aguirre",
+    "license": "Proprietary - all rights reserved by Katherine E. Aguirre; authorized for the Juana IA project, its build process, authorized contributors, and distributed Juana IA artifacts; no standalone third-party reuse or relicensing.",
+    "commercial_use": true,
+    "modification_allowed": true,
+    "redistribution_allowed": true,
+    "attribution": "Juana and Juana IA are owned by Katherine E. Aguirre; master image generated with OpenAI ChatGPT under her creative direction."
+  },
+  "derived_from_sha256": []
+}

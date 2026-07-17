@@ -37,6 +37,7 @@ coverage.xml
 # IDE
 .vscode/
 .idea/
+.codex-remote-attachments/
 *.swp
 *.swo
 *.orig

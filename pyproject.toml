@@ -38,6 +38,7 @@ dependencies = [
     # Specification layer.
     "pydantic>=2.0",
     "pyyaml>=6.0",
+    "Pillow>=11,<13",
     # Legacy CLI retained during migration.
     "click>=8.1",
     # Legacy REST bridge. This dependency will become optional before removal.
@@ -56,6 +57,9 @@ Documentation = "https://github.com/kathesama/vrm-ia-maker/tree/development/docs
 Upstream = "https://github.com/hrabanazviking/Seidr-Smidja"
 
 [project.optional-dependencies]
+authoring-openai = [
+    "openai>=2.30,<3",
+]
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
