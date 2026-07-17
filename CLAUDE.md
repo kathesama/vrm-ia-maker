@@ -21,8 +21,14 @@ a validated VRM 1.0 avatar for deterministic use from Three.js.
   `BOOTSTRAP-{number}` key may be used for repository-governance work.
 - Keep local ticket artifacts in `.ai-specs/changes/{TICKET}/`; do not commit
   them and never place them under `.sdd-kit/`.
-- Complete and validate the SDD planning gate, then stop for explicit approval
-  before implementation.
+- Complete and validate the SDD planning gate.
+- For in-scope reversible work, record
+  `Approval source: standing delegated execution authority (GH-20)` and continue
+  without another approval prompt.
+- Stop for explicit approval only when a closed escalation condition in
+  `docs/DELEGATED_EXECUTION_POLICY.md` applies.
+- Continue through implementation, CI, valid P0/P1/P2 review repair, merge, branch
+  cleanup, and the next safe vertical slice.
 - Use TDD and Conventional Commits. Keep PRs focused.
 
 ## Repository Language Policy
@@ -38,7 +44,8 @@ sh tools/setup_sdd_workspace.sh
 sh tools/check_sdd_workspace.sh
 ```
 
-See `docs/development/sdd-workflow.md` for the full operator workflow.
+See `docs/development/sdd-workflow.md` for the full operator workflow and
+`docs/DELEGATED_EXECUTION_POLICY.md` for the standing approval and escalation rules.
 
 ## SDD Kit
 
