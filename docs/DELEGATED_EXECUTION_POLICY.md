@@ -102,7 +102,7 @@ inspect current state
 -> run local validation
 -> open or update the pull request
 -> wait for CI and automated review
--> address valid P1 and P2 findings
+-> address valid P0, P1, and P2 findings
 -> merge when green and review-clean
 -> delete the merged branch
 -> select the next slice
@@ -239,7 +239,7 @@ compatible tools exist.
 The agent may merge a pull request into `development` when:
 
 - required CI is green;
-- no unresolved valid P1 or P2 review thread remains;
+- no unresolved valid P0, P1, or P2 review thread remains;
 - repository language, provenance, and licensing policies are satisfied;
 - the PR has a valid GitHub issue and required SDD evidence;
 - generated-artifact claims are supported by actual files and reports.
