@@ -31,7 +31,7 @@ Within that repository, the agent is authorized to:
 
 - create and update GitHub issues;
 - create, update, and delete feature branches;
-- create commits;
+- create commits on feature, fix, documentation, spike, recovery, or release-preparation branches;
 - open, update, mark ready, and merge pull requests;
 - address review comments;
 - rerun or repair CI;
@@ -42,6 +42,30 @@ Within that repository, the agent is authorized to:
   message.
 
 `development` is the normal integration branch. `main` remains release-oriented.
+
+## Protected integration branches
+
+Agents must never create or push ordinary work commits directly to `development` or
+`main`.
+
+All implementation, documentation, recovery, and CI repair work must occur on a
+non-protected branch and enter `development` through a pull request. The only normal
+agent-created commit allowed to land on `development` is the commit produced by the
+approved GitHub pull-request merge operation.
+
+Partial, experimental, failing, or review-incomplete work must remain on its feature or
+recovery branch. It must not be used as an integration checkpoint.
+
+When an accidental direct commit is discovered:
+
+1. preserve its exact commit on a recovery branch;
+2. stop further direct pushes;
+3. restore a green integration state through a reviewable recovery or revert plan;
+4. split the preserved work into the correct issue branches and pull requests;
+5. do not hide, amend away, or silently discard the accidental work.
+
+Rewriting shared history remains an escalation condition. Prefer a normal revert or
+reviewable recovery flow unless Kathy explicitly authorizes a force update.
 
 ## Standing approval and the SDD gate
 
@@ -64,6 +88,7 @@ The normal loop is:
 inspect current state
 -> select the smallest useful vertical slice
 -> create or resolve the GitHub issue
+-> create a non-protected branch
 -> create and validate SDD artifacts
 -> implement with RED -> GREEN -> REFACTOR
 -> run local validation
