@@ -95,6 +95,20 @@ Approved character references may drive provisional visual builds. Clearly mark
 unmeasured assumptions as provisional; do not promote them to measured facts or
 approved visual canon without evidence or direct visual approval.
 
+## Protected Integration Branches
+
+Never create or push ordinary work commits directly to `development` or `main`.
+All work must happen on a non-protected branch and enter `development` through a
+pull request.
+
+Partial, experimental, failing, or review-incomplete work belongs on its feature or
+recovery branch. A commit created directly on `development` is a process defect even
+when its code is useful.
+
+When such a commit is discovered, preserve it on a recovery branch, stop further
+direct pushes, and restore a green integration state through a reviewable recovery
+or revert flow. Do not rewrite shared history without Kathy's explicit approval.
+
 ## Mandatory SDD Workflow
 
 Before modifying production code, tests, schemas, build behavior, or service
@@ -111,11 +125,12 @@ configuration:
    - when a closed escalation condition applies, present the plan and stop for
      explicit `approve`, `change`, or `deny`;
    - otherwise, record standing approval under GH-20 and continue without asking.
-7. Implement following RED -> GREEN -> REFACTOR.
-8. Run QA, code review, changelog validation, PR report generation, and PR
+7. Create or switch to a non-protected issue branch before the first work commit.
+8. Implement following RED -> GREEN -> REFACTOR.
+9. Run QA, code review, changelog validation, PR report generation, and PR
    content validation before declaring the ticket ready.
-9. Continue through CI, review repair, merge, branch cleanup, and the next slice
-   unless a closed escalation condition is reached.
+10. Continue through CI, review repair, merge, branch cleanup, and the next slice
+    unless a closed escalation condition is reached.
 
 ## Repository Commands
 
