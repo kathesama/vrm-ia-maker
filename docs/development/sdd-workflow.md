@@ -3,7 +3,7 @@
 This repository consumes `kathesama/kathy-sdd-kit` as a pinned Git submodule.
 The kit provides the reusable planning, approval, QA, review, and PR-evidence
 workflow. This repository owns its architecture, product constraints, build
-commands, asset policy, and ticket policy.
+commands, asset policy, ticket policy, and delegated execution policy.
 
 ## Pinned Kit Revision
 
@@ -85,15 +85,30 @@ For each ticket:
    sh .sdd-kit/tools/validate-impl-spec.sh {TICKET}
    ```
 
-7. Present the plan and stop. Only an explicit `approve` authorizes execution.
+7. Apply the repository approval rule:
+   - When a closed escalation condition in
+     `docs/DELEGATED_EXECUTION_POLICY.md` applies, present the plan and stop. Only
+     an explicit `approve` authorizes execution.
+   - Otherwise, record
+     `Approval source: standing delegated execution authority (GH-20)` and
+     continue without another approval prompt.
 8. Implement with RED -> GREEN -> REFACTOR.
 9. Run QA and code review as separate gates.
-10. Validate execution evidence and PR content:
+10. Address every valid P0, P1, and P2 finding.
+11. Validate execution evidence and PR content:
 
     ```sh
     sh .sdd-kit/tools/validate-changelog.sh {TICKET}
     sh .sdd-kit/tools/validate-pr-content.sh {TICKET}
     ```
+
+12. Continue through CI, review repair, merge, branch cleanup, and the next safe
+    vertical slice unless a closed escalation condition is reached.
+
+The project-local delegated execution policy takes precedence over a generic
+per-ticket approval stop from the reusable kit for work performed inside this
+repository. It does not waive planning, evidence, CI, review, provenance,
+licensing, or truthfulness requirements.
 
 ## Repository Validation
 
