@@ -97,8 +97,8 @@ approved visual canon without evidence or direct visual approval.
 
 Branch-discipline rules in the delegated-execution policy apply only to implementation
 agents. They do not restrict Kathy, as repository owner, from intentionally making a
-direct commit, and agents must not characterize an owner-authored commit as an agent
-policy violation.
+direct commit. Agents must treat owner-authored commits as current repository state and
+must not characterize them as agent-policy violations.
 
 ## Mandatory SDD Workflow
 
