@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "status": "provisional_visual_checkpoint",
+  "character_id": "juana",
+  "master_reference": {
+    "id": "juana-master-character-sheet-v3",
+    "path": "examples/Juana-full-concept-white.png",
+    "sha256": "63c3510c51545748ae7aa9d1d6b7d909067bcc1d22663f4bf1b91742f6c88a18",
+    "byte_length": 2190515,
+    "source_class": "creative_canon",
+    "rights_holder": "Katherine E. Aguirre",
+    "license": "Proprietary - authorized for the Juana IA project"
+  },
+  "approved_package": {
+    "id": "juana-talking-bust-v1",
+    "path": "output/character-design-packages/juana-talking-bust-v1",
+    "revision": "2026-07-16-gh-19-r2",
+    "profile": "talking-bust-visual-reference"
+  },
+  "face_references": [
+    {
+      "view": "front",
+      "path": "references/face/neutral-front.png",
+      "sha256": "7d678da98fff33e9af1f7bdcfe113218b0da51ad143b81d94d97a911e7ba9814"
+    },
+    {
+      "view": "left-profile",
+      "path": "references/face/left-profile.png",
+      "sha256": "adca50ca931660b5d610d64d976f7b65322ff203baaee2ed1b493887f0564a3f"
+    },
+    {
+      "view": "right-profile",
+      "path": "references/face/right-profile.png",
+      "sha256": "bec451055c7d8641ff759f1f018c182320170dd1b615488bcc64973a43d622e5"
+    },
+    {
+      "view": "left-three-quarter",
+      "path": "references/face/left-three-quarter.png",
+      "sha256": "f817bae375a5e6ec5c77f35b26df18479f1a1add70f8697636aaf43d5520b8ba"
+    },
+    {
+      "view": "right-three-quarter",
+      "path": "references/face/right-three-quarter.png",
+      "sha256": "cf42f5a078be5b343389898363a888591134cc6ebfc9b9b73884b49ed54043a0"
+    }
+  ],
+  "hair": {
+    "close_cut_side": "anatomical_left",
+    "long_side": "anatomical_right",
+    "licensed_blockout_assets": [
+      "MakeHuman short01 hair, CC0-1.0",
+      "MakeHuman long01 hair, CC0-1.0"
+    ],
+    "approved_front_sha256": "aea789a8d27f03f4b6eed3666528766812705f6dcc97f1603e573f8b005b2d15",
+    "approved_left_sha256": "e326159b2bddeb00451c9e60b21214b5562f013876f2815717b0547f2b73f597",
+    "approved_right_sha256": "6ca31c9b10569daa679f9a1b01e2a5528fe70be76012fdaf5bc057f832083f22",
+    "approved_back_sha256": "b5323f89a2506bc00823f209c22d033e1ff304a69df3682043375ea844679217"
+  },
+  "outfit": {
+    "underlayer": "fitted pearl-white low straight neckline",
+    "outer_layer": "open pearl-white leather-or-latex technical jacket",
+    "choker": "black JUANA IA choker with rear gold closure",
+    "licensed_blockout_assets": [
+      "MakeHuman female_casualsuit02 topology, CC0-1.0",
+      "MakeHuman female_elegantsuit01 topology, CC0-1.0"
+    ],
+    "front_sha256": "28359ea036e4d817f067601d23924d0d0f647682fe97dbbc6a81c8259202dfd9",
+    "left_sha256": "5b5830725d428f44e4650e59a79b6d39c903ee5f766c0831685c45f75a79bcbc",
+    "right_sha256": "58b57e476e7821a2434a4f836cc7c7a4d0b8ecec30bf92b8c8c6eefc57498027",
+    "back_sha256": "300e5c480ed5dde63f2e934ee120f79d806847757747d4f8ce0b64753af0370e"
+  },
+  "facial_details": {
+    "eyebrows": "MakeHuman eyebrow002, CC0-1.0",
+    "eyelashes": "MakeHuman eyelashes03, CC0-1.0"
+  },
+  "identity_assumptions": [
+    {
+      "id": "face-proportions-r1",
+      "classification": "provisional_visual_assumption",
+      "description": "Oval face, defined cheekbones, broad warm-brown eyes, full lips, and a compact straight nose are fitted by reversible MPFB target weights."
+    },
+    {
+      "id": "upper-torso-proportions-r1",
+      "classification": "provisional_visual_assumption",
+      "description": "Shoulder, neck, bust, and upper-torso proportions are visual blockout choices rather than metric measurements."
+    },
+    {
+      "id": "hair-volume-r1",
+      "classification": "provisional_visual_assumption",
+      "description": "The CC0 MakeHuman long01 proxy is asymmetrically trimmed and supplemented by deterministic editable curves inferred from approved visible views."
+    }
+  ]
+}

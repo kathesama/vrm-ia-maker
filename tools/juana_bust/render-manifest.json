@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0",
+  "status": "provisional",
+  "render": {
+    "engine": "BLENDER_EEVEE_NEXT",
+    "resolution": [1024, 1024],
+    "resolution_percentage": 100,
+    "image_format": "PNG",
+    "film_transparent": false,
+    "samples": 64,
+    "frame": 1,
+    "canonicalization": {
+      "strip_metadata": true,
+      "rgb_lsb_bits_cleared": 2
+    },
+    "view_transform": "AgX",
+    "look": "AgX - Medium High Contrast",
+    "world_color": [0.018, 0.022, 0.03, 1.0]
+  },
+  "views": [
+    {
+      "id": "front",
+      "camera_location": [0.0, -1.5, 1.42],
+      "target": [0.0, 0.0, 1.42],
+      "lens_mm": 85.0,
+      "reference": "references/face/neutral-front.png"
+    },
+    {
+      "id": "left-profile",
+      "camera_location": [1.5, 0.0, 1.42],
+      "target": [0.0, 0.0, 1.42],
+      "lens_mm": 85.0,
+      "reference": "references/face/left-profile.png"
+    },
+    {
+      "id": "right-profile",
+      "camera_location": [-1.5, 0.0, 1.42],
+      "target": [0.0, 0.0, 1.42],
+      "lens_mm": 85.0,
+      "reference": "references/face/right-profile.png"
+    },
+    {
+      "id": "left-three-quarter",
+      "camera_location": [1.061, -1.061, 1.42],
+      "target": [0.0, 0.0, 1.42],
+      "lens_mm": 85.0,
+      "reference": "references/face/left-three-quarter.png"
+    },
+    {
+      "id": "right-three-quarter",
+      "camera_location": [-1.061, -1.061, 1.42],
+      "target": [0.0, 0.0, 1.42],
+      "lens_mm": 85.0,
+      "reference": "references/face/right-three-quarter.png"
+    }
+  ]
+}

@@ -86,6 +86,25 @@ Already established:
 - the separation between tool licensing and generated-avatar licensing;
 - a pinned SDD workflow through `kathy-sdd-kit`.
 
+### Provisional Juana 3D checkpoint
+
+GH-22 adds the first concrete human Juana bust tracer bullet. It pins Blender,
+MPFB, the MakeHuman base, and every CC0 asset; authors an editable scene with a
+rig, separate eyes, a functional jaw, expression morphs, asymmetric hair, and
+the visible outfit; exports a provisional GLB; and produces five deterministic
+reference comparisons.
+
+Run the offline route from the repository root:
+
+```bash
+python tools/juana_bust/build_preview.py
+```
+
+The outputs remain under ignored `build/juana-bust-preview/` paths and are
+explicitly not the final VRM. See
+[`tools/juana_bust/README.md`](tools/juana_bust/README.md) for the input lock,
+validation sequence, outputs, and visual-review boundary.
+
 Planned next:
 
 1. characterize retained Blender, asset, render, VRM-reader, and CLI behavior;
@@ -176,4 +195,8 @@ The current project is independent and is not affiliated with or endorsed by the
 
 ## Development workflow
 
-Repository changes follow the specification-driven workflow documented in [`docs/development/sdd-workflow.md`](docs/development/sdd-workflow.md). Ticket evidence remains local under `.ai-specs/changes/{TICKET}/`, and implementation starts only after explicit approval.
+Repository changes follow the specification-driven workflow documented in
+[`docs/development/sdd-workflow.md`](docs/development/sdd-workflow.md). Ticket
+evidence remains local under `.ai-specs/changes/{TICKET}/`. The standing
+approval rules and closed escalation conditions are recorded in
+[`docs/DELEGATED_EXECUTION_POLICY.md`](docs/DELEGATED_EXECUTION_POLICY.md).
