@@ -56,8 +56,8 @@ non-protected branch and enter `development` through a pull request. The only no
 agent-created commit allowed to land on `development` is the commit produced by the
 approved GitHub pull-request merge operation.
 
-Partial, experimental, failing, or review-incomplete work must remain on its feature or
-recovery branch. It must not be used as an integration checkpoint.
+Partial, experimental, failing, or review-incomplete agent work must remain on its
+feature or recovery branch. It must not be used as an integration checkpoint.
 
 When an accidental agent-created direct commit is discovered:
 
@@ -66,6 +66,9 @@ When an accidental agent-created direct commit is discovered:
 3. restore a green integration state through a reviewable recovery or revert plan;
 4. split the preserved work into the correct issue branches and pull requests;
 5. do not hide, amend away, or silently discard the accidental work.
+
+An intentional direct commit authored by Kathy is not an agent-policy violation and
+must not be characterized as accidental agent behavior.
 
 Rewriting shared history remains an escalation condition. Prefer a normal revert or
 reviewable recovery flow unless Kathy explicitly authorizes a force update.
