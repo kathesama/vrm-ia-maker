@@ -27,6 +27,9 @@ from vrm_ia_maker import load_base_model_adapter_manifest
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 TOOL_ROOT = REPOSITORY_ROOT / "tools" / "juana_bust"
 ADAPTER_PATH = REPOSITORY_ROOT / "examples" / "juana-bust" / "base-adapter.json"
+APPROVED_SOURCE_PACKAGE = (
+    REPOSITORY_ROOT / "output" / "character-design-packages" / "juana-talking-bust-v1"
+)
 
 
 def test_toolchain_lock_pins_verified_human_base_inputs() -> None:
@@ -273,6 +276,9 @@ def test_fourth_likeness_pass_combines_identity_and_body_calibration() -> None:
 
 
 def test_approved_source_images_match_recorded_evidence() -> None:
+    if not APPROVED_SOURCE_PACKAGE.is_dir():
+        pytest.skip("Approved local character sources are not distributed in clean checkouts.")
+
     verified = verify_source_inputs(REPOSITORY_ROOT)
 
     assert len(verified) == 15
