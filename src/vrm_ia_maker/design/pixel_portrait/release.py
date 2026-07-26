@@ -345,6 +345,13 @@ def build_runtime_release(
             "invalid_version",
             "Runtime release version must not be empty.",
         )
+    resolved_archive_path = archive_path.resolve()
+    resolved_lock_path = lock_path.resolve()
+    if resolved_archive_path == resolved_lock_path:
+        raise RuntimeReleaseError(
+            "colliding_destinations",
+            "Runtime release archive and lock destinations must be distinct.",
+        )
     verified_root = runtime_root.resolve()
     inventory = verify_runtime(verified_root)
     archive_bytes = _archive_bytes(verified_root, inventory)
@@ -364,9 +371,7 @@ def build_runtime_release(
             "png_count": inventory.png_count,
             "scenarios": {
                 scenario_id: {"bytes": byte_count}
-                for scenario_id, byte_count in sorted(
-                    inventory.scenario_bytes.items()
-                )
+                for scenario_id, byte_count in sorted(inventory.scenario_bytes.items())
             },
             "seal": {
                 "path": _SEAL_FILENAME,
@@ -375,10 +380,10 @@ def build_runtime_release(
         },
         "schema_version": _LOCK_SCHEMA_VERSION,
     }
-    lock_bytes = (
-        json.dumps(lock, indent=2, sort_keys=True, ensure_ascii=True) + "\n"
-    ).encode("utf-8")
+    lock_bytes = (json.dumps(lock, indent=2, sort_keys=True, ensure_ascii=True) + "\n").encode(
+        "utf-8"
+    )
 
-    _replace_file_bytes(archive_path.resolve(), archive_bytes)
-    _replace_file_bytes(lock_path.resolve(), lock_bytes)
+    _replace_file_bytes(resolved_archive_path, archive_bytes)
+    _replace_file_bytes(resolved_lock_path, lock_bytes)
     return lock

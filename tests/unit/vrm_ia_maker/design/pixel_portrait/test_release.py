@@ -26,12 +26,8 @@ APPROVED_BUILD = (
     / "juana-pixel-portrait-runtime"
     / "juana-talking-bust-v2-pixel-ui-ready"
 )
-CANONICAL_RUNTIME = (
-    REPOSITORY_ROOT / "packages" / "juana-pixel-runtime" / "v2" / "runtime"
-)
-RUNTIME_GALLERY = (
-    REPOSITORY_ROOT / "packages" / "juana-pixel-runtime" / "v2" / "gallery.html"
-)
+CANONICAL_RUNTIME = REPOSITORY_ROOT / "packages" / "juana-pixel-runtime" / "v2" / "runtime"
+RUNTIME_GALLERY = REPOSITORY_ROOT / "packages" / "juana-pixel-runtime" / "v2" / "gallery.html"
 
 
 def _sha256(path: Path) -> str:
@@ -61,10 +57,7 @@ def _write_fixture_runtime(root: Path) -> Path:
         target.write_bytes(content)
     seal = {
         "schema_version": "2.0",
-        "files": {
-            relative_path: _sha256(root / relative_path)
-            for relative_path in sorted(files)
-        },
+        "files": {relative_path: _sha256(root / relative_path) for relative_path in sorted(files)},
     }
     (root / "bundle-seal.json").write_text(
         json.dumps(seal, indent=2, sort_keys=True) + "\n",
@@ -113,9 +106,7 @@ def test_synchronize_runtime_preserves_every_sealed_byte(tmp_path: Path) -> None
 
     assert destination_inventory.files == source_inventory.files
     for relative_path in source_inventory.files:
-        assert (destination / relative_path).read_bytes() == (
-            source / relative_path
-        ).read_bytes()
+        assert (destination / relative_path).read_bytes() == (source / relative_path).read_bytes()
 
 
 def test_release_archive_and_lock_are_deterministic(tmp_path: Path) -> None:
@@ -150,6 +141,22 @@ def test_release_archive_and_lock_are_deterministic(tmp_path: Path) -> None:
         names = archive.namelist()
         assert names == sorted(names)
         assert all(info.date_time == (1980, 1, 1, 0, 0, 0) for info in archive.infolist())
+
+
+def test_release_rejects_colliding_archive_and_lock_paths(tmp_path: Path) -> None:
+    runtime = _write_fixture_runtime(tmp_path / "runtime")
+    destination = tmp_path / "release-output"
+    destination.write_bytes(b"preserve")
+
+    with pytest.raises(RuntimeReleaseError, match="distinct"):
+        build_runtime_release(
+            runtime,
+            destination,
+            destination,
+            version="2.0.0",
+        )
+
+    assert destination.read_bytes() == b"preserve"
 
 
 def test_package_runtime_cli_emits_machine_readable_release_identity(

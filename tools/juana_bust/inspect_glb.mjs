@@ -90,7 +90,13 @@ export function validateJuanaInspection(inspection, adapter = null) {
     );
   }
 
-  for (const meshName of ["Juana_Production_Body", "Juana_Production_Head"]) {
+  const requiredSkinnedMeshNames = [
+    "Juana_Production_Body",
+    "Juana_Production_Head",
+    ...hairNames,
+    ...outfitNames,
+  ];
+  for (const meshName of requiredSkinnedMeshNames) {
     if (!Object.hasOwn(inspection.skinnedMeshes, meshName)) {
       throw new Error(`${meshName} must load as a skinned mesh through Three.js.`);
     }

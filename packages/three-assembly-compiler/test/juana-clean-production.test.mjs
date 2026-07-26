@@ -97,3 +97,26 @@ test("requires both production body and head to be skinned", () => {
     /Juana_Production_Head must load as a skinned mesh/,
   );
 });
+
+test("requires every production hair and outfit mesh to be skinned", () => {
+  const inspection = cleanInspection();
+  delete inspection.skinnedMeshes.Juana_Production_Hair_01;
+
+  assert.throws(
+    () => validateJuanaInspection(inspection, ADAPTER),
+    /Juana_Production_Hair_01 must load as a skinned mesh/,
+  );
+});
+
+test("requires every production hair and outfit skin to contain required bones", () => {
+  const inspection = cleanInspection();
+  inspection.skinnedMeshes.Juana_Production_Outfit_01 =
+    inspection.skinnedMeshes.Juana_Production_Outfit_01.filter(
+      (boneName) => boneName !== "head",
+    );
+
+  assert.throws(
+    () => validateJuanaInspection(inspection, ADAPTER),
+    /Juana_Production_Outfit_01 skin is missing required bones: \["head"\]/,
+  );
+});
