@@ -649,6 +649,90 @@ opaque technical mannequin when a realistic worn rendering is rejected, while th
 master remains authoritative for the final worn appearance. That isolation does not
 authorize hidden closures, unseen surfaces, anatomy, or production geometry.
 
+## Panel-first pixel talking-portrait authoring
+
+D-015 defines `vrm_ia_maker.design.pixel_portrait` as an additive sibling of the
+bounded sheet-first workflow above. The profile fixes 49 individually authored panels
+in nine ordered families: presence states, face turnaround, facial mechanics,
+upper-body turnaround, expressions, visemes, hair construction, outfit construction,
+and material reference. It does not alter the existing talking-bust contracts.
+
+The seven base-set PNGs are creative authority for the visible two-dimensional
+identity. The sealed `juana-talking-bust-v1` package is a verified, read-only source of
+technical coverage. A technical view constrains the requested view or articulation but
+cannot override the base-set identity or establish measurements, hidden geometry, or
+legal rights. The V1 package remains unchanged for the VRM path.
+
+One explicit `run` may make at most one provider request for one panel, and a panel may
+have no more than three recorded attempts. Explicit approval of the neutral presence
+panel creates the immutable `PortraitIdentityLock` required by dependent panels. Its
+palette, logical grid, screen-facing hair orientation, and pixel-space anchors are
+visual consistency constraints rather than measured production geometry.
+
+Each approved panel remains an individual reference with its own provenance, attempt,
+and human-review evidence. The workflow composes nine deterministic family review
+sheets from the current approved panel hashes, then composes the deterministic package
+master from the nine current family sheets. Composite sheets are review artifacts and
+are never used as crop sources. The sole `package.json.master_reference` is:
+
+```text
+references/master/master-character-sheet.png
+```
+
+The package uses schema version `1.1` and profile `pixel-talking-portrait`. It retains
+the canonical `references/`, `measurements/`, `landmarks/`, `palette/`, `materials/`,
+`expressions/`, `visemes/`, `hair/`, `outfit/`, `assets/`, and `adapters/` directories,
+along with the package, provenance, approval, gap, and seal metadata. The additive
+profile-specific paths are:
+
+```text
+sources/
+|-- base-set/
+`-- talking-bust-v1/
+
+references/
+|-- presence-states/
+`-- master/
+    |-- approved-sheets/
+    `-- master-character-sheet.png
+
+authoring/
+|-- pixel-style.json
+|-- panel-definitions.json
+|-- anchor-profiles.json
+|-- composite-sheets.json
+|-- panel-validation-reports/
+|   `-- <panel-id>.json
+`-- composite-slot-maps/
+    |-- <family-id>.json
+    `-- package-master.json
+```
+
+`authoring/panel-validation-reports/` contains one copied validation report for each
+sealed panel. `authoring/composite-slot-maps/` contains one slot map for each family
+sheet and `package-master.json` for the package master. These JSON files are hashed
+audit metadata covered by the package seal; they are not canonical image references,
+master references, or crop sources.
+
+The sealed CharacterDesignPackage has no `runtime/` directory. The six expression
+panels are `authoring_only` in revision one. A later issue may compile eligible
+presence-state, eye-patch, and mouth-patch inputs into a separately sealed runtime
+bundle for Three.js, but that derived bundle must remain outside the package and leave
+the package bytes unchanged.
+
+The internal command namespace is:
+
+```text
+python -m vrm_ia_maker.design.pixel_portrait.cli ...
+```
+
+It does not modify the public `seidr` entrypoint. Rights and provenance completeness,
+neutral identity approval, individual panel approval, family-sheet review, package
+master review, and hash integrity are fail-closed sealing gates. This section defines
+the profile contract; it does not assert that the 49 live Juana images, a sealed
+production pixel package, a runtime bundle, a Three.js viewer, or a final VRM already
+exists.
+
 ## Responsibility map
 
 ### CharacterDesignPackage

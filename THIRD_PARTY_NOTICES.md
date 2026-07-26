@@ -27,14 +27,35 @@ The submodule retains its own files, notices, and per-file source attributions. 
 
 ## External build tools
 
-The following tools are not vendored in this repository and retain their own licenses:
+The following tools retain their own licenses:
 
 - Blender
 - VRM Add-on for Blender
 - Git
 - GitHub Actions
 
-Operators are responsible for installing compatible versions and complying with the terms distributed by each project.
+Operators are responsible for installing compatible versions and complying with
+the terms distributed by each project.
+
+### GH-22 provisional human-base toolchain
+
+The reproducible GH-22 visual checkpoint uses local, ignored copies of:
+
+- Blender 4.2.0, GPL-3.0-or-later;
+- MPFB 2.0.16, GPL-3.0-or-later;
+- MakeHuman system assets, CC0-1.0.
+
+The MakeHuman material used by this checkpoint includes the hm08 base mesh,
+default rig and weights, young African female skin, eye placement, long01 and
+short01 hair, eyebrow002, eyelashes03, female_elegantsuit01, and
+female_casualsuit02. Repository-authored edits remain provisional and do not
+change the source asset licenses.
+
+The exact upstream URLs, versions, local paths, byte lengths, SHA-256 digests,
+and per-artifact licenses are recorded in
+`tools/juana_bust/toolchain-lock.json`. These binary and media inputs remain
+under ignored `build/local-toolchain/` paths and are not redistributed by the
+repository.
 
 ## Python dependencies
 
@@ -70,7 +91,15 @@ Several dependencies support inherited features that are scheduled for removal o
 
 ## Three.js validation dependencies
 
-Three.js and `@pixiv/three-vrm` are planned for the future compatibility validator. They are not yet vendored or part of the current Python runtime. Their notices must be added when the Node-based validator is introduced.
+The production assembly compiler pins Three.js 0.183.2 under the MIT License.
+GH-22 uses its `GLTFLoader` from Node to inspect the provisional GLB structure.
+The dependency is installed from npm and is not vendored into the Python
+runtime.
+
+The retained SPIKE-1 and SPIKE-2 evidence pins `@pixiv/three-vrm` 3.5.1 and
+Three.js 0.183.2 in the respective spike packages. GH-22 exports a provisional
+GLB rather than a VRM and therefore does not claim production
+`@pixiv/three-vrm` validation.
 
 ## Models, textures, and generated avatars
 

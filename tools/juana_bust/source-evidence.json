@@ -1,0 +1,688 @@
+{
+  "schema_version": "1.0",
+  "status": "provisional_visual_checkpoint",
+  "character_id": "juana",
+  "master_reference": {
+    "id": "juana-master-character-sheet-v3",
+    "path": "examples/Juana-full-concept-white.png",
+    "sha256": "63c3510c51545748ae7aa9d1d6b7d909067bcc1d22663f4bf1b91742f6c88a18",
+    "byte_length": 2190515,
+    "source_class": "creative_canon",
+    "rights_holder": "Katherine E. Aguirre",
+    "license": "Proprietary - authorized for the Juana IA project"
+  },
+  "approved_package": {
+    "id": "juana-talking-bust-v1",
+    "path": "output/character-design-packages/juana-talking-bust-v1",
+    "revision": "2026-07-16-gh-19-r2",
+    "profile": "talking-bust-visual-reference"
+  },
+  "active_production_route": {
+    "revision": "gh-22-clean-production-pass-2",
+    "status": "ready_for_kathy_body_skin_and_topology_review",
+    "invalid_overlay_archive": {
+      "path": "artifacts/debug/invalid-donor-overlay.blend",
+      "sha256": "067104a73bf97945b1941916b443aada90c39cf8a019bcf6f45776d333927020",
+      "authoring_input": false
+    },
+    "source_role_policy": "mutually_exclusive_non_exportable_donors",
+    "production_geometry_policy": "one_body_one_head_one_humanoid_rig",
+    "body_fit": "sam3d_normalized_approved_athletic_profile_cage_fit",
+    "head_fit": "eye_landmarks_cage_deformation_and_controlled_masked_shrinkwrap",
+    "texture_transfer": {
+      "method": "filtered_highpoly_face_bake_with_approved_reference_skin_tone",
+      "direct_bake_application": false,
+      "reason": "The fused high-poly donor contains discontinuous UV fragments from skin, hair, and outfit. The deterministic bake is retained as evidence, while the production material uses the approved package skin reference."
+    },
+    "expressions_and_clothing_polish_deferred": true,
+    "visual_canon_approved": false
+  },
+  "visual_correction_pass_2": {
+    "classification": "provisional_visual_assumption",
+    "review_status": "changes_requested",
+    "implementation_status": "ready_for_visual_review",
+    "full_character_sheet_sha256": "eeb2f11aa0a426a56b594dfdf0a406c6caa3d7db11df10178aa2c228bda2eb8f",
+    "direction": "Athletic hourglass silhouette with a defined waist, contained abdomen, balanced shoulders and hips, sculptural curves, and warm medium golden skin.",
+    "measurement_policy": "Visual ratios are checkpoint constraints and are not asserted physical measurements.",
+    "body_references": [
+      {
+        "path": "output/character-design-packages/juana-talking-bust-v1/references/master/approved-sheets/upper-body-turnaround.png",
+        "sha256": "072175db0db585fd92219c0b58829dd919df9fde696f4c1f0131bc05eebd2032"
+      },
+      {
+        "path": "output/character-design-packages/juana-talking-bust-v1/references/body/a-pose-front.png",
+        "sha256": "900a193776ad4645cb2c80d171690dd4baf83d2704b3d6e61803b7acbe928536"
+      }
+    ],
+    "body_profile": {
+      "name": "approved_athletic_hourglass",
+      "macro_overrides": {
+        "weight": 0.28,
+        "muscle": 0.58,
+        "proportions": 0.68,
+        "cupsize": 0.76,
+        "firmness": 0.78
+      },
+      "sam3d_torso_half_width_m": 0.2,
+      "sam3d_band_quantile": 0.9,
+      "bands": {
+        "hips": {
+          "z_fraction": 0.53,
+          "width_scale_range": [0.96, 1.0],
+          "depth_scale_range": [0.88, 0.94]
+        },
+        "lower_waist": {
+          "z_fraction": 0.59,
+          "width_scale_range": [0.9, 0.98],
+          "depth_scale_range": [0.78, 0.88]
+        },
+        "waist": {
+          "z_fraction": 0.63,
+          "width_scale_range": [0.88, 0.96],
+          "depth_scale_range": [0.76, 0.86]
+        },
+        "underbust": {
+          "z_fraction": 0.68,
+          "width_scale_range": [0.9, 0.98],
+          "depth_scale_range": [0.84, 0.94]
+        },
+        "bust": {
+          "z_fraction": 0.73,
+          "width_scale_range": [0.9, 1.0],
+          "depth_scale_range": [0.96, 1.08]
+        },
+        "shoulders": {
+          "z_fraction": 0.8,
+          "width_scale_range": [0.9, 1.0],
+          "depth_scale_range": [0.86, 0.96]
+        }
+      },
+      "accepted_ratios": {
+        "waist_to_hip_width": [0.6, 0.74],
+        "waist_to_hip_depth": [0.6, 0.8]
+      }
+    },
+    "skin": {
+      "reference_path": "output/character-design-packages/juana-talking-bust-v1/references/materials/skin.png",
+      "reference_sha256": "8000236316b8fea12e1bbc0b7a2349fce7bd70ac7d9efe74cc1ff4ee5ee26224",
+      "sampling_method": "Warm skin median sampled from approved face regions and moderated for neutral AgX review lighting.",
+      "base_color_linear": [0.3, 0.14, 0.075],
+      "finish": "neutral_low_plasticity"
+    }
+  },
+  "donors": [
+    {
+      "id": "juana-provisional-vrm-donor",
+      "source_filename": "production-modular-without-accessory.vrm",
+      "local_path": "build/local-modular-runtime/production-modular-without-accessory.vrm",
+      "sha256": "7533c198f84db73e02be921f7f6d33dfae693f2cefdc7a6cf724b4597beefc0c",
+      "byte_length": 1017216,
+      "role": "humanoid_contract_and_exporter_donor_only",
+      "production_geometry": false,
+      "direct_export_allowed": false,
+      "required_collection": "_DONOR_VRM"
+    },
+    {
+      "id": "juana-sam3d-humanmesh-donor",
+      "source_filename": "person_5.glb",
+      "local_path": "build/local-donors/person_5.glb",
+      "sha256": "d1f41ceee19ecfd493945cc9895c068563237e385858e66aa545e0d9f09721de",
+      "byte_length": 2642560,
+      "role": "body_shape_and_proportion_donor_only",
+      "production_geometry": false,
+      "direct_export_allowed": false,
+      "required_collection": "_REFERENCE_SAM3D",
+      "source_mesh": "HumanMesh",
+      "source_mesh_inspection": {
+        "vertices": 18439,
+        "triangles": 36874,
+        "armatures": 0,
+        "skins": 0,
+        "animations": 0,
+        "shape_keys": 0,
+        "auxiliary_meshes_excluded": 173
+      },
+      "derived_reference": {
+        "path": "tools/juana_bust/assets/juana-sam3d-humanmesh-reference.glb",
+        "sha256": "56b66c573295aa4993fa3d4464ea55a8286e7e73789f49c75a11769682c846b0",
+        "byte_length": 665204,
+        "source_sha256": "d1f41ceee19ecfd493945cc9895c068563237e385858e66aa545e0d9f09721de",
+        "mesh_count": 1,
+        "mesh_name": "SAM3D_HumanMesh_Reference",
+        "vertices": 18439,
+        "triangles": 36874,
+        "root_transform_applied": true,
+        "feet_on_ground": true,
+        "horizontal_centered": true,
+        "production_geometry": false,
+        "direct_final_export_allowed": false,
+        "normalization_report": "build/juana-clean-production-preview/sam3d-reference-report.json"
+      }
+    },
+    {
+      "id": "juana-highpoly-bust-donor",
+      "source_filename": "Torso - busto.glb",
+      "local_path": "build/local-donors/Torso - busto.glb",
+      "sha256": "ead2c523ff3c44a57cf79527c3f439443f6f077067735a90c7efbb7065525364",
+      "byte_length": 83723136,
+      "role": "likeness_hair_outfit_and_texture_bake_donor_only",
+      "production_geometry": false,
+      "direct_export_allowed": false,
+      "required_collection": "_REFERENCE_HIGHPOLY",
+      "mesh_inspection": {
+        "vertices": 924342,
+        "triangles": 1363714,
+        "shape_keys": 0,
+        "base_color_resolution": [4096, 4096],
+        "metallic_roughness_resolution": [4096, 4096],
+        "normal_resolution": [4096, 4096]
+      }
+    }
+  ],
+  "generated_geometry_reference": {
+    "id": "juana-hunyuan-torso-bust-r1",
+    "source_filename": "Torso - busto.glb",
+    "sha256": "ead2c523ff3c44a57cf79527c3f439443f6f077067735a90c7efbb7065525364",
+    "byte_length": 83723136,
+    "source_class": "generated_3d_reference",
+    "origin": "Tencent HY 3D Global",
+    "origin_url": "https://3d.hunyuanglobal.com/",
+    "download_origin_evidence": "NTFS Zone.Identifier referrer and host metadata",
+    "input_rights_attestation": "Kathy confirmed ownership of the Juana character and the creative inputs used to generate the resource.",
+    "terms": {
+      "title": "Tencent HY 3D Terms of Service",
+      "url": "https://docs.qq.com/doc/DSHRnRWp2YUVuQXJv",
+      "last_updated": "2026-02-06",
+      "section": "6.3",
+      "output_rights_assigned_to_user": true,
+      "ai_disclosure_required": true
+    },
+    "mesh_inspection": {
+      "vertices": 924342,
+      "triangles": 1363714,
+      "connected_components": 19956,
+      "skins": 0,
+      "morph_targets": 0,
+      "animations": 0,
+      "classification": "fragmented_static_reconstruction"
+    },
+    "derived_visual_proxy": {
+      "id": "juana-hunyuan-identity-proxy",
+      "path": "tools/juana_bust/assets/juana-hunyuan-identity-proxy.glb",
+      "sha256": "2d8d4d7e44e6f5a2d3b4168d08f05e12ec38c64249d3e1bc129465c28de5dd11",
+      "byte_length": 21689044,
+      "source_sha256": "ead2c523ff3c44a57cf79527c3f439443f6f077067735a90c7efbb7065525364",
+      "ai_generated_disclosure": true,
+      "status": "superseded_rejected_overlay_checkpoint",
+      "processing": {
+        "generator": "tools/juana_bust/blender_prepare_hunyuan_proxy.py",
+        "source_triangle_count": 1363714,
+        "target_triangle_count": 350000,
+        "output_triangle_count": 349999,
+        "maximum_texture_size": 2048,
+        "material_policy": "embedded base color only with neutral physically based response",
+        "semantic_materials": [
+          "source_neutral",
+          "skin_warm_golden_brown",
+          "hair_low_specular"
+        ]
+      },
+      "integration": {
+        "visible_checkpoint_only": true,
+        "production_topology": false,
+        "rig_source": "MakeHuman MPFB default rig",
+        "functional_eye_overlay": true,
+        "functional_brow_overlay": true,
+        "replacement_plan": "Retopologize the approved identity surface onto the rigged production head before final VRM output."
+      }
+    },
+    "usage_boundary": {
+      "raw_source_export": false,
+      "derived_geometry_transfer": true,
+      "derived_texture_transfer": true,
+      "export_unmodified_source_geometry": false,
+      "calibration_inputs": [
+        "facial_landmark_proportions",
+        "profile_projection",
+        "hair_silhouette",
+        "upper_torso_silhouette"
+      ],
+      "reason": "The original reconstruction is too fragmented for production rigging or morphing. A checksummed reduced proxy is permitted only as the visible identity layer for this provisional visual checkpoint while the MPFB body remains the editable rig and morph source."
+    }
+  },
+  "generated_body_calibration_reference": {
+    "id": "juana-meta-mhr-body-r1",
+    "source_filename": "juana-grb to vrm.blend",
+    "sha256": "8c7afc60df553b66e1cc3143fc2c04878475e97433d9d6af190393f48eec9ccb",
+    "byte_length": 1648460,
+    "source_class": "generated_3d_calibration_reference",
+    "origin": "Meta AI Demos",
+    "origin_url": "https://aidemos.meta.com/",
+    "generator_family": "SAM 3D Body / MHR",
+    "ai_generated_disclosure": true,
+    "authorization": {
+      "rights_holder": "Katherine E. Aguirre",
+      "input_rights_confirmed": true,
+      "project_use_authorized": true,
+      "attestation": "Kathy generated this resource from a Juana image that she owns and authorized its use in the Juana IA project."
+    },
+    "terms": {
+      "title": "Meta AIs Terms of Service",
+      "url": "https://www.facebook.com/legal/eu-ai-terms",
+      "recorded_boundary": "The user retains rights held in the supplied prompt image and accepts responsibility for verifying and using generated output.",
+      "license": "Proprietary user-authorized generated output for the Juana IA project"
+    },
+    "mhr_decoder": {
+      "repository": "https://github.com/facebookresearch/MHR",
+      "release": "v1.0.1",
+      "release_asset_url": "https://github.com/facebookresearch/MHR/releases/download/v1.0.1/assets.zip",
+      "release_asset_sha256": "e4f4f205cd87c0fa106577ba1de4fc763e4eb197c924461d2ef7e6944e9d6b94",
+      "lod": 1,
+      "lod1_sha256": "d66fbca815bcde6532f728f1f63071003c5d43ff44f56e263a0807baec1ae055",
+      "license": "Apache-2.0",
+      "asset_license_embedded": true,
+      "license_file_sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "license_clarification": "https://github.com/facebookresearch/MHR/issues/62"
+    },
+    "mesh_inspection": {
+      "vertices": 18439,
+      "triangles": 36874,
+      "joint_markers": 88,
+      "visual_bone_segments": 85,
+      "armatures": 0,
+      "weighted_vertices": 0,
+      "shape_keys": 0,
+      "topology_match": "MHR LOD1 exact vertex and ordered-face identity"
+    },
+    "derived_calibration_asset": {
+      "id": "juana-meta-mhr-calibration",
+      "path": "tools/juana_bust/assets/juana-meta-mhr-calibration.glb",
+      "sha256": "1ebf81ff20306c98a1037f3bf2172557a0d9e130286502d8dc831efd711d7af6",
+      "byte_length": 1062356,
+      "source_sha256": "8c7afc60df553b66e1cc3143fc2c04878475e97433d9d6af190393f48eec9ccb",
+      "vertices": 18439,
+      "triangles": 36874,
+      "bones": 88,
+      "weight_groups": 72,
+      "weighted_vertices": 18439,
+      "processing": {
+        "generator": "tools/juana_bust/blender_prepare_meta_mhr_calibration.py",
+        "coordinate_conversion": "x,-y,-z",
+        "topology_policy": "Exact MHR LOD1 vertex and ordered-face identity required",
+        "weight_policy": "Official MHR LOD1 weights transferred by vertex index; procedural twist weights collapsed to named parent limb bones"
+      }
+    },
+    "usage_boundary": {
+      "calibration_only": true,
+      "production_base": false,
+      "face_likeness_source": false,
+      "allowed_inputs": [
+        "upper_body_proportions",
+        "joint_landmarks",
+        "rig_alignment",
+        "body_silhouette_comparison"
+      ],
+      "reason": "The single-image MHR result is useful for body and joint calibration, but its face is not recognizable enough to replace the approved Juana identity references or the MPFB production base."
+    }
+  },
+  "visual_review": {
+    "checkpoint": "gh-22-invalid-donor-overlay",
+    "decision": "changes_requested",
+    "next_checkpoint": "gh-22-clean-production-pass-1",
+    "visual_canon_approved": false,
+    "decision_owner": "Kathy",
+    "priority_order": [
+      "facial_likeness",
+      "hair_identity",
+      "review_presentation"
+    ]
+  },
+  "face_references": [
+    {
+      "view": "front",
+      "path": "references/face/neutral-front.png",
+      "sha256": "7d678da98fff33e9af1f7bdcfe113218b0da51ad143b81d94d97a911e7ba9814"
+    },
+    {
+      "view": "left-profile",
+      "path": "references/face/left-profile.png",
+      "sha256": "adca50ca931660b5d610d64d976f7b65322ff203baaee2ed1b493887f0564a3f"
+    },
+    {
+      "view": "right-profile",
+      "path": "references/face/right-profile.png",
+      "sha256": "bec451055c7d8641ff759f1f018c182320170dd1b615488bcc64973a43d622e5"
+    },
+    {
+      "view": "left-three-quarter",
+      "path": "references/face/left-three-quarter.png",
+      "sha256": "f817bae375a5e6ec5c77f35b26df18479f1a1add70f8697636aaf43d5520b8ba"
+    },
+    {
+      "view": "right-three-quarter",
+      "path": "references/face/right-three-quarter.png",
+      "sha256": "cf42f5a078be5b343389898363a888591134cc6ebfc9b9b73884b49ed54043a0"
+    }
+  ],
+  "hair": {
+    "close_cut_side": "anatomical_left",
+    "long_side": "anatomical_right",
+    "licensed_blockout_assets": [
+      "MakeHuman short01 hair, CC0-1.0",
+      "MakeHuman long01 hair, CC0-1.0"
+    ],
+    "approved_front_sha256": "aea789a8d27f03f4b6eed3666528766812705f6dcc97f1603e573f8b005b2d15",
+    "approved_left_sha256": "e326159b2bddeb00451c9e60b21214b5562f013876f2815717b0547f2b73f597",
+    "approved_right_sha256": "6ca31c9b10569daa679f9a1b01e2a5528fe70be76012fdaf5bc057f832083f22",
+    "approved_back_sha256": "b5323f89a2506bc00823f209c22d033e1ff304a69df3682043375ea844679217"
+  },
+  "outfit": {
+    "underlayer": "fitted pearl-white low straight neckline",
+    "outer_layer": "open pearl-white leather-or-latex technical jacket",
+    "choker": "black JUANA IA choker with rear gold closure",
+    "licensed_blockout_assets": [
+      "MakeHuman female_casualsuit02 topology, CC0-1.0",
+      "MakeHuman female_elegantsuit01 topology, CC0-1.0"
+    ],
+    "front_sha256": "28359ea036e4d817f067601d23924d0d0f647682fe97dbbc6a81c8259202dfd9",
+    "left_sha256": "5b5830725d428f44e4650e59a79b6d39c903ee5f766c0831685c45f75a79bcbc",
+    "right_sha256": "58b57e476e7821a2434a4f836cc7c7a4d0b8ecec30bf92b8c8c6eefc57498027",
+    "back_sha256": "300e5c480ed5dde63f2e934ee120f79d806847757747d4f8ce0b64753af0370e"
+  },
+  "facial_details": {
+    "eyebrows": "Repository-authored reversible brow ribbons fitted to approved references",
+    "eyelashes": "MakeHuman eyelashes03, CC0-1.0"
+  },
+  "likeness_pass_3": {
+    "classification": "provisional_visual_assumption",
+    "transfer_method": "manual_landmark_calibration",
+    "raw_mesh_transfer": false,
+    "landmark_calibration": {
+      "hunyuan_eye_center_distance_m": 0.10624,
+      "hunyuan_eye_to_chin_distance_m": 0.16000,
+      "eye_spacing_scale": 1.25,
+      "eye_to_chin_compression": 0.86,
+      "lower_face_max_up_m": 0.027,
+      "method": "Fixed front-view ray intersections calibrated against the approved multiview character references"
+    },
+    "target_controls": [
+      {
+        "name": "identity_head_compact",
+        "target": "head/head-scale-vert-decr.target.gz",
+        "weight": 0.52
+      },
+      {
+        "name": "identity_head_width",
+        "target": "head/head-scale-horiz-incr.target.gz",
+        "weight": 0.16
+      },
+      {
+        "name": "identity_head_square",
+        "target": "head/head-square.target.gz",
+        "weight": 0.1
+      },
+      {
+        "name": "identity_head_rectangular",
+        "target": "head/head-rectangular.target.gz",
+        "weight": 0.18
+      },
+      {
+        "name": "identity_cheekbone_left",
+        "target": "cheek/l-cheek-bones-incr.target.gz",
+        "weight": 0.82
+      },
+      {
+        "name": "identity_cheekbone_right",
+        "target": "cheek/r-cheek-bones-incr.target.gz",
+        "weight": 0.82
+      },
+      {
+        "name": "identity_cheek_left",
+        "target": "cheek/l-cheek-volume-incr.target.gz",
+        "weight": 0.08
+      },
+      {
+        "name": "identity_cheek_right",
+        "target": "cheek/r-cheek-volume-incr.target.gz",
+        "weight": 0.08
+      },
+      {
+        "name": "identity_chin_width",
+        "target": "chin/chin-width-incr.target.gz",
+        "weight": 0.48
+      },
+      {
+        "name": "identity_chin_bone",
+        "target": "chin/chin-bones-incr.target.gz",
+        "weight": 0.06
+      },
+      {
+        "name": "identity_chin_height",
+        "target": "chin/chin-height-decr.target.gz",
+        "weight": 0.62
+      },
+      {
+        "name": "identity_chin_projection",
+        "target": "chin/chin-prominent-incr.target.gz",
+        "weight": 0.18
+      },
+      {
+        "name": "identity_eye_left_out",
+        "target": "eyes/l-eye-trans-out.target.gz",
+        "weight": 0.85
+      },
+      {
+        "name": "identity_eye_right_out",
+        "target": "eyes/r-eye-trans-out.target.gz",
+        "weight": 0.85
+      },
+      {
+        "name": "identity_eye_left_narrow",
+        "target": "eyes/l-eye-scale-decr.target.gz",
+        "weight": 0.24
+      },
+      {
+        "name": "identity_eye_right_narrow",
+        "target": "eyes/r-eye-scale-decr.target.gz",
+        "weight": 0.24
+      },
+      {
+        "name": "identity_eye_left_height",
+        "target": "eyes/l-eye-height2-decr.target.gz",
+        "weight": 0.42
+      },
+      {
+        "name": "identity_eye_right_height",
+        "target": "eyes/r-eye-height2-decr.target.gz",
+        "weight": 0.42
+      },
+      {
+        "name": "identity_eye_left_down",
+        "target": "eyes/l-eye-trans-down.target.gz",
+        "weight": 0.18
+      },
+      {
+        "name": "identity_eye_right_down",
+        "target": "eyes/r-eye-trans-down.target.gz",
+        "weight": 0.18
+      },
+      {
+        "name": "identity_eye_left_fold",
+        "target": "eyes/l-eye-eyefold-angle-up.target.gz",
+        "weight": 0.18
+      },
+      {
+        "name": "identity_eye_right_fold",
+        "target": "eyes/r-eye-eyefold-angle-up.target.gz",
+        "weight": 0.18
+      },
+      {
+        "name": "identity_brow_arch",
+        "target": "eyebrows/eyebrows-angle-up.target.gz",
+        "weight": 0.22
+      },
+      {
+        "name": "identity_nose_width",
+        "target": "nose/nose-scale-horiz-incr.target.gz",
+        "weight": 0.12
+      },
+      {
+        "name": "identity_nose_depth",
+        "target": "nose/nose-scale-depth-incr.target.gz",
+        "weight": 0.26
+      },
+      {
+        "name": "identity_nose_volume",
+        "target": "nose/nose-volume-incr.target.gz",
+        "weight": 0.08
+      },
+      {
+        "name": "identity_nostril_width",
+        "target": "nose/nose-nostrils-width-incr.target.gz",
+        "weight": 0.2
+      },
+      {
+        "name": "identity_nose_point_width",
+        "target": "nose/nose-point-width-incr.target.gz",
+        "weight": 0.08
+      },
+      {
+        "name": "identity_nose_bridge",
+        "target": "nose/nose-greek-incr.target.gz",
+        "weight": 0.12
+      },
+      {
+        "name": "identity_mouth_width",
+        "target": "mouth/mouth-scale-horiz-incr.target.gz",
+        "weight": 0.08
+      },
+      {
+        "name": "identity_mouth_depth",
+        "target": "mouth/mouth-scale-depth-incr.target.gz",
+        "weight": 0.08
+      },
+      {
+        "name": "identity_mouth_up",
+        "target": "mouth/mouth-trans-up.target.gz",
+        "weight": 0.22
+      },
+      {
+        "name": "identity_upper_lip",
+        "target": "mouth/mouth-upperlip-volume-incr.target.gz",
+        "weight": 0.28
+      },
+      {
+        "name": "identity_lower_lip",
+        "target": "mouth/mouth-lowerlip-volume-incr.target.gz",
+        "weight": 0.38
+      },
+      {
+        "name": "identity_cupids_bow",
+        "target": "mouth/mouth-cupidsbow-incr.target.gz",
+        "weight": 0.38
+      },
+      {
+        "name": "identity_upper_lip_height",
+        "target": "mouth/mouth-upperlip-height-incr.target.gz",
+        "weight": 0.1
+      },
+      {
+        "name": "identity_lower_lip_height",
+        "target": "mouth/mouth-lowerlip-height-incr.target.gz",
+        "weight": 0.12
+      },
+      {
+        "name": "identity_shoulders",
+        "target": "torso/measure-shoulder-dist-incr.target.gz",
+        "weight": 0.08
+      }
+    ],
+    "eye_appearance": {
+      "shape": "narrow_almond",
+      "iris_color": "warm_amber_brown",
+      "eyelid_thickness": "realistic_visible_rim"
+    },
+    "eyebrows": {
+      "shape": "thick_dark_strong_arch",
+      "construction": "repository_authored_editable_mesh"
+    },
+    "skin": {
+      "tone": "warm_golden_brown",
+      "finish": "neutral_low_plasticity"
+    },
+    "hair": {
+      "construction": "large_flowing_asymmetric_clumps",
+      "minimum_clump_count": 12,
+      "close_cut_side": "anatomical_left",
+      "long_side": "anatomical_right"
+    }
+  },
+  "likeness_pass_4": {
+    "classification": "provisional_visual_assumption",
+    "review_status": "rejected_invalid_donor_overlay",
+    "historical_only": true,
+    "superseded_by": "gh-22-clean-production-pass-1",
+    "identity_source": "juana-hunyuan-identity-proxy",
+    "body_calibration_source": "juana-meta-mhr-calibration",
+    "production_base": "makehuman-hm08-juana-bust-r1",
+    "visible_surface_policy": {
+      "identity_proxy": "full_bust_identity_surface",
+      "meta_mhr": "hidden_body_and_rig_calibration_only",
+      "mpfb": "hidden_editable_rig_and_morph_scaffold"
+    },
+    "saved_blend_presentation": {
+      "active_camera": "Camera_front",
+      "visible_collection": "JUANA_REVIEW",
+      "visible_objects": [
+        "Juana_Hunyuan_Identity_Proxy",
+        "Juana_Iris_Overlay_L",
+        "Juana_Iris_Overlay_R"
+      ],
+      "hidden_collections": [
+        "JUANA_TECHNICAL",
+        "JUANA_CAMERAS",
+        "JUANA_LIGHTING",
+        "JUANA_GLTF_EXPORT"
+      ],
+      "identity_proxy_scope": "talking_bust_only",
+      "identity_proxy_cutoff_world_z": 1.18,
+      "construction_layers_preserved": true
+    },
+    "face_adjustments": {
+      "lower_face_vertical_compression": 0.07,
+      "cheekbone_width_scale": 1.045,
+      "jaw_width_scale": 1.06,
+      "eye_vertical_scale": 0.82,
+      "iris_overlay_width_m": 0.0166,
+      "nose_width_scale": 1.08,
+      "nose_projection_m": 0.003,
+      "lip_projection_m": 0.0015,
+      "skin_tint_linear": [0.46, 0.34, 0.26]
+    },
+    "body_adjustments": {
+      "source_topology": "MHR LOD1",
+      "joint_marker_count": 88,
+      "visual_bone_segment_count": 85,
+      "production_base_replaced": false,
+      "visible_in_checkpoint": false,
+      "outfit_policy": "The Meta-derived shell remains hidden because the source pose creates provisional collar and arm boundaries; the clean Hunyuan bust outfit remains visible for this face-first review."
+    }
+  },
+  "identity_assumptions": [
+    {
+      "id": "face-proportions-r3",
+      "classification": "provisional_visual_assumption",
+      "description": "The visible checkpoint uses the checksummed reduced Hunyuan identity proxy for its compact face, cheekbones, jaw, nose, and lips. Reversible MPFB controls remain underneath as the rigged production-topology scaffold."
+    },
+    {
+      "id": "upper-torso-proportions-r1",
+      "classification": "provisional_visual_assumption",
+      "description": "Shoulder, neck, bust, and upper-torso proportions are visual blockout choices rather than metric measurements."
+    },
+    {
+      "id": "hair-volume-r3",
+      "classification": "provisional_visual_assumption",
+      "description": "The visible checkpoint carries the generated resource's reduced asymmetric hair surface and base-color texture. The separate CC0 MakeHuman hair remains underneath as the rigged replacement scaffold for production retopology and spring-bone work."
+    }
+  ]
+}

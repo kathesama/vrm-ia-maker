@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "adapter_id": "juana-mpfb-default-bust",
+  "adapter_version": "0.1.0-provisional",
+  "base_asset_id": "makehuman-hm08-juana-bust-r1",
+  "bones": {
+    "hips": "root",
+    "spine": "spine05",
+    "chest": "spine03",
+    "upperChest": "spine01",
+    "neck": "neck03",
+    "head": "head",
+    "leftEye": "eye.L",
+    "rightEye": "eye.R",
+    "jaw": "jaw",
+    "leftShoulder": "clavicle.L",
+    "leftUpperArm": "upperarm01.L",
+    "leftLowerArm": "lowerarm01.L",
+    "leftHand": "wrist.L",
+    "rightShoulder": "clavicle.R",
+    "rightUpperArm": "upperarm01.R",
+    "rightLowerArm": "lowerarm01.R",
+    "rightHand": "wrist.R"
+  },
+  "expression_map": {
+    "blink": [{"shape_key": "blink", "weight": 1.0}],
+    "blinkLeft": [{"shape_key": "blinkLeft", "weight": 1.0}],
+    "blinkRight": [{"shape_key": "blinkRight", "weight": 1.0}],
+    "aa": [{"shape_key": "aa", "weight": 1.0}],
+    "ih": [{"shape_key": "ih", "weight": 1.0}],
+    "ou": [{"shape_key": "ou", "weight": 1.0}],
+    "ee": [{"shape_key": "ee", "weight": 1.0}],
+    "oh": [{"shape_key": "oh", "weight": 1.0}]
+  },
+  "look_at": {
+    "horizontal_inner_degrees": 15.0,
+    "horizontal_outer_degrees": 35.0,
+    "vertical_down_degrees": 12.0,
+    "vertical_up_degrees": 18.0
+  }
+}

@@ -18,3 +18,8 @@
 *.jpg binary
 *.jpeg binary
 *.webp binary
+
+# Required binary evidence is stored through path-scoped Git LFS rules.
+/artifacts/debug/invalid-donor-overlay.blend filter=lfs diff=lfs merge=lfs -text
+/tools/juana_bust/assets/*.glb filter=lfs diff=lfs merge=lfs -text
+/packages/juana-pixel-runtime/v2/runtime/**/*.png filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,27 @@
+{
+  "archive": {
+    "bytes": 36704715,
+    "filename": "juana-pixel-runtime-v2.zip",
+    "sha256": "0606b46242e60459a1dd6c474faf2ab66a9588a64ced8ea2fc389bd9fe6ef903"
+  },
+  "package_id": "juana-talking-bust-v2-pixel",
+  "package_version": "2.0.0",
+  "runtime": {
+    "bytes": 36906823,
+    "file_count": 55,
+    "png_count": 51,
+    "scenarios": {
+      "juana-diorama-room": {
+        "bytes": 14814763
+      },
+      "juana-workstation": {
+        "bytes": 20096314
+      }
+    },
+    "seal": {
+      "path": "bundle-seal.json",
+      "sha256": "f03ea06b496a70fd213e7b8f1878b83443371129dee5298d5d088c48aae8b83b"
+    }
+  },
+  "schema_version": "1.0"
+}

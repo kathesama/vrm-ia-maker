@@ -80,6 +80,18 @@ config/user.yaml
 .claude/skills/
 .cursor/skills/
 
+# Repository-local authoring and test scratch
+/.superpowers/brainstorm/
+/.pytest-tmp*/
+/.pytest_tmp/
+/.tmp_pytest*/
+/.t3*/
+/.tmp/
+
+# Rejected debug outputs are local except for the GH-22 archive checkpoint
+/artifacts/debug/*
+!/artifacts/debug/invalid-donor-overlay.blend
+
 # OS
 .DS_Store
 Thumbs.db

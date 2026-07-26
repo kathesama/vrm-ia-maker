@@ -1,0 +1,376 @@
+{
+  "schema_version": "1.0",
+  "status": "provisional",
+  "artifacts": [
+    {
+      "id": "blender-4.2.0-windows-x64-zip",
+      "component": "Blender",
+      "version": "4.2.0",
+      "source_url": "https://download.blender.org/release/Blender4.2/blender-4.2.0-windows-x64.zip",
+      "checksum_url": "https://download.blender.org/release/Blender4.2/blender-4.2.0.sha256",
+      "license": "GPL-3.0-or-later",
+      "relative_path": "build/local-toolchain/blender-4.2.0-windows-x64.zip",
+      "sha256": "b6e72874f8cb5c4ed77f9b03d7f1fde851b9455a7ff02a1e1119c876318ebc65",
+      "byte_length": 383542405
+    },
+    {
+      "id": "blender-4.2.0-executable",
+      "component": "Blender",
+      "version": "4.2.0",
+      "source_artifact": "blender-4.2.0-windows-x64-zip",
+      "license": "GPL-3.0-or-later",
+      "relative_path": "build/local-toolchain/blender-4.2.0-windows-x64/blender.exe",
+      "sha256": "80fb653019a0afb3bda0947ec74e84dc0a94d0d388f9b3849433c0e1a4efdabe",
+      "byte_length": 82739840
+    },
+    {
+      "id": "mpfb-2.0.16-extension",
+      "component": "MPFB",
+      "version": "2.0.16",
+      "git_tag": "v2.0.16",
+      "git_commit": "f47e9a1bb57a02ec3a33089bfe9e19f85bbf70ec",
+      "source_url": "https://extensions.blender.org/download/sha256:b5cdc8b08147e0c6463e4faa01147491b13a0b062f73415363f029debd11c934/add-on-mpfb-v2.0.16.zip?repository=%2Fapi%2Fv1%2Fextensions%2F&blender_version_min=4.2.0",
+      "license": "GPL-3.0-or-later",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/add-on-mpfb-v2.0.16.zip",
+      "sha256": "b5cdc8b08147e0c6463e4faa01147491b13a0b062f73415363f029debd11c934",
+      "byte_length": 44978070
+    },
+    {
+      "id": "mpfb-2.0.16-installed-tree",
+      "component": "MPFB isolated Blender extension tree",
+      "version": "2.0.16",
+      "source_artifact": "mpfb-2.0.16-extension",
+      "license": "GPL-3.0-or-later",
+      "kind": "tree",
+      "tree_hash_policy": "Sorted UTF-8 relative path, NUL, file bytes, NUL; excludes __pycache__ and .pyc/.pyo files",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/blender-profile/extensions/user_default/mpfb",
+      "sha256": "942acff6b097a4244a7c380c7a1afee4dbf3f6207d2cf61e90b441cadfb7c7cb",
+      "file_count": 2316
+    },
+    {
+      "id": "makehuman-system-assets-cc0",
+      "component": "MakeHuman system assets",
+      "version": "2020-09-CC0",
+      "source_url": "https://files2.makehumancommunity.org/asset_packs/makehuman_system_assets/makehuman_system_assets_cc0.zip",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/makehuman_system_assets_cc0.zip",
+      "sha256": "b542127a8e25547c7c29c19f2d1d2adb9a664c80396ecd694095dbc8028a0107",
+      "byte_length": 280737770
+    },
+    {
+      "id": "makehuman-hm08-base",
+      "component": "MakeHuman hm08 base mesh",
+      "version": "MPFB-2.0.16-bundled",
+      "source_artifact": "mpfb-2.0.16-extension",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/extension/data/3dobjs/base.obj",
+      "sha256": "8e761e6624b8f54536409135d1636da63b32486a90d4897f84e121d144f6fb4c",
+      "byte_length": 1749303
+    },
+    {
+      "id": "makehuman-default-rig",
+      "component": "MakeHuman default rig",
+      "version": "MPFB-2.0.16-bundled",
+      "source_artifact": "mpfb-2.0.16-extension",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/extension/data/rigs/standard/rig.default.json",
+      "sha256": "8b949de35c2dd70dbb5094e57a8586c3b9a9f650775a293212581a8f67be6797",
+      "byte_length": 126355
+    },
+    {
+      "id": "makehuman-default-rig-weights",
+      "component": "MakeHuman default rig weights",
+      "version": "MPFB-2.0.16-bundled",
+      "source_artifact": "mpfb-2.0.16-extension",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/extension/data/rigs/standard/weights.default.json",
+      "sha256": "154b866774a8c2b055a8e86419f22a87b76c60440fdcb70bcb78345f00924e89",
+      "byte_length": 5034981
+    },
+    {
+      "id": "makehuman-young-african-female-skin",
+      "component": "MakeHuman system skin",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/skins/young_african_female/young_african_female.mhmat",
+      "sha256": "f7e0726cb1c4f1f3dd23e5143f2d91a7c69ddd782a8b1de153a36e1549028b5c",
+      "byte_length": 1457
+    },
+    {
+      "id": "makehuman-young-african-female-skin-texture",
+      "component": "MakeHuman system skin texture",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/skins/young_african_female/young_darkskinned_female_diffuse.png",
+      "sha256": "96aa4a96b247fc90d371587bb88e6ae3bfc77e83f5126f17e6bbb713aa200470",
+      "byte_length": 4427634
+    },
+    {
+      "id": "makehuman-high-poly-eyes",
+      "component": "MakeHuman high-poly eyes",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/eyes/high-poly/high-poly.mhclo",
+      "sha256": "b183cfe37120ab726f9b3f2ea6cd3a64c44ce7b4bd91a77c841cf70c04f83a0d",
+      "byte_length": 72490
+    },
+    {
+      "id": "makehuman-brown-eye-texture",
+      "component": "MakeHuman brown eye texture",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/eyes/materials/brown_eye.png",
+      "sha256": "4659691c7295ad6206c78b003e5fd0e5f91dcd53032fa914a229bb48cabe424b",
+      "byte_length": 610817
+    },
+    {
+      "id": "makehuman-long01-hair-proxy",
+      "component": "MakeHuman long01 hair proxy",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/hair/long01/long01.mhclo",
+      "sha256": "94ecbebfd834da2cbee2ce90b730972590eb22a252ecd9592038ea736e063646",
+      "byte_length": 220891
+    },
+    {
+      "id": "makehuman-long01-hair-mesh",
+      "component": "MakeHuman long01 hair mesh",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/hair/long01/long01.obj",
+      "sha256": "7f1d6dadbdf9e96435251955d6657e77ea5433c9bc7c85a5c5f5e4eae0cb9a8c",
+      "byte_length": 215324
+    },
+    {
+      "id": "makehuman-long01-hair-material",
+      "component": "MakeHuman long01 hair material",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/hair/long01/long01.mhmat",
+      "sha256": "74ec88267e679d316f8037a074511ffc887b27e198ea381d0ae4a3f180f96760",
+      "byte_length": 1297
+    },
+    {
+      "id": "makehuman-long01-hair-texture",
+      "component": "MakeHuman long01 hair texture",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/hair/long01/long01_diffuse.png",
+      "sha256": "e8dc25d90f8f62467e8630420e1240a400d070054fb7c3f1d3f7bf3e457d6c2c",
+      "byte_length": 2915253
+    },
+    {
+      "id": "makehuman-short01-hair-proxy",
+      "component": "MakeHuman short01 hair proxy",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/hair/short01/short01.mhclo",
+      "sha256": "ae1ffaa98da5753b803b3a173bede4895d2215e6bb94763f3765a71f0e984f35",
+      "byte_length": 201588
+    },
+    {
+      "id": "makehuman-short01-hair-mesh",
+      "component": "MakeHuman short01 hair mesh",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/hair/short01/short01.obj",
+      "sha256": "d998d8416f9b5d5591f1d756f4d292288d000a6951bc0f4d2e8e72727bbc44fa",
+      "byte_length": 194450
+    },
+    {
+      "id": "makehuman-short01-hair-material",
+      "component": "MakeHuman short01 hair material",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/hair/short01/short01.mhmat",
+      "sha256": "01e2e12ce3f3d3c859225456660acadcdd27d4f4b4d888bcbd6f11998cadd975",
+      "byte_length": 1314
+    },
+    {
+      "id": "makehuman-short01-hair-texture",
+      "component": "MakeHuman short01 hair texture",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/hair/short01/short01_diffuse.png",
+      "sha256": "f34a0957184e3d1e911ed59245f874f8d4843f61ee44ff49f43edb4be0196949",
+      "byte_length": 2354146
+    },
+    {
+      "id": "makehuman-eyebrow002-proxy",
+      "component": "MakeHuman eyebrow002 proxy",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/eyebrows/eyebrow002/eyebrow002.mhclo",
+      "sha256": "550781113f5c3971e7e200450d7d94e2290d43e9449a42667d2bf972c1eb0593",
+      "byte_length": 9132
+    },
+    {
+      "id": "makehuman-eyebrow002-mesh",
+      "component": "MakeHuman eyebrow002 mesh",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/eyebrows/eyebrow002/eyebrow002.obj",
+      "sha256": "7fe4e036311c41802bd6889acb02d1b06184a0dd759ac72e1d9fba1037243667",
+      "byte_length": 8227
+    },
+    {
+      "id": "makehuman-eyebrow002-material",
+      "component": "MakeHuman eyebrow002 material",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/eyebrows/eyebrow002/eyebrow002.mhmat",
+      "sha256": "57fc4d1f089be90b2ab4774bdc7c077b5a519f33a293e57ee74762c7714a3b34",
+      "byte_length": 1098
+    },
+    {
+      "id": "makehuman-eyebrow002-texture",
+      "component": "MakeHuman eyebrow002 texture",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/eyebrows/eyebrow002/eyebrow002.png",
+      "sha256": "1de4e4cb69b3f4324390219ffbeb17a0b2555104d3211d1ac667655b69b64038",
+      "byte_length": 96277
+    },
+    {
+      "id": "makehuman-eyelashes03-proxy",
+      "component": "MakeHuman eyelashes03 proxy",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/eyelashes/eyelashes03/eyelashes03.mhclo",
+      "sha256": "d98e0c9b8c7df400fe850952fd7c8471eceeb5814ded4fece8bcceac8e55b2ec",
+      "byte_length": 8191
+    },
+    {
+      "id": "makehuman-eyelashes03-mesh",
+      "component": "MakeHuman eyelashes03 mesh",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/eyelashes/eyelashes03/eyelashes03.obj",
+      "sha256": "d1073c69e962e3b2524158d4b5e7026c85e4d181206d4d331dfbe2d2d16ac160",
+      "byte_length": 18836
+    },
+    {
+      "id": "makehuman-eyelashes03-material",
+      "component": "MakeHuman eyelashes03 material",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/eyelashes/eyelashes03/eyelashes03.mhmat",
+      "sha256": "43a571e0a7587c3af38947164f668ff5a43a1396abbeb2da4af4e5262fceeaf6",
+      "byte_length": 1074
+    },
+    {
+      "id": "makehuman-eyelashes03-texture",
+      "component": "MakeHuman eyelashes03 texture",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/eyelashes/eyelashes03/eyelashes03.png",
+      "sha256": "3bae1d182039b695d5012b0d463bdc6a7c6e6669c7e0cf2eadef35aec4023ec5",
+      "byte_length": 132260
+    },
+    {
+      "id": "makehuman-female-elegantsuit01-proxy",
+      "component": "MakeHuman female_elegantsuit01 proxy",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/clothes/female_elegantsuit01/female_elegantsuit01.mhclo",
+      "sha256": "8ed657dbc49466e6a485993cfdcfd7b6ac30a0f44408dfd38de7a649477d8928",
+      "byte_length": 151008
+    },
+    {
+      "id": "makehuman-female-elegantsuit01-mesh",
+      "component": "MakeHuman female_elegantsuit01 mesh",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/clothes/female_elegantsuit01/female_elegantsuit01.obj",
+      "sha256": "3b46cef6d63968954dc00c39ede649d76c05e5d36fe9f9c677349c88fd424de9",
+      "byte_length": 174924
+    },
+    {
+      "id": "makehuman-female-elegantsuit01-material",
+      "component": "MakeHuman female_elegantsuit01 material",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/clothes/female_elegantsuit01/female_elegantsuit01.mhmat",
+      "sha256": "a0b1708efbff3c4ad96f8e7d8cc27fb1652719549455ce94b89bcf6294cfbed0",
+      "byte_length": 1408
+    },
+    {
+      "id": "makehuman-female-casualsuit02-proxy",
+      "component": "MakeHuman female_casualsuit02 proxy",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/clothes/female_casualsuit02/female_casualsuit02.mhclo",
+      "sha256": "dbbce782dcb95f2dc9d9b70fe66629c9a177fe0a8d14fd546961ed01eeb556c8",
+      "byte_length": 196616
+    },
+    {
+      "id": "makehuman-female-casualsuit02-mesh",
+      "component": "MakeHuman female_casualsuit02 mesh",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/clothes/female_casualsuit02/female_casualsuit02.obj",
+      "sha256": "569ce1a79f61c1a213fd813d14da656863e6832badaa41225543fcba93bbe1ce",
+      "byte_length": 231599
+    },
+    {
+      "id": "makehuman-female-casualsuit02-material",
+      "component": "MakeHuman female_casualsuit02 material",
+      "version": "2020-09-CC0",
+      "source_artifact": "makehuman-system-assets-cc0",
+      "license": "CC0-1.0",
+      "relative_path": "build/local-toolchain/mpfb-2.0.16/assets/extracted/clothes/female_casualsuit02/female_casualsuit02.mhmat",
+      "sha256": "d44cdca8e96ce4f78b79b5a92e15d6c607820ea5c5e8c30fe0104188635cfc9a",
+      "byte_length": 1404
+    }
+  ],
+  "human_base": {
+    "generator": "MPFB",
+    "base_mesh": "hm08",
+    "rig": "default",
+    "scale": 0.1,
+    "feet_on_ground": true,
+    "mask_helpers": true,
+    "detailed_helpers": true,
+    "extra_vertex_groups": true,
+    "macro_settings": {
+      "gender": 0.0,
+      "age": 0.48,
+      "muscle": 0.48,
+      "weight": 0.58,
+      "proportions": 0.62,
+      "height": 0.55,
+      "cupsize": 0.82,
+      "firmness": 0.72,
+      "race": {
+        "asian": 0.1,
+        "caucasian": 0.42,
+        "african": 0.48
+      }
+    }
+  }
+}
