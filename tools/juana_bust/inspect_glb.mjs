@@ -5,23 +5,13 @@ import { fileURLToPath } from "node:url";
 import { inspectGlb } from "../../packages/three-assembly-compiler/src/inspect-glb.mjs";
 
 const REQUIRED_OBJECTS = new Set([
-  "Juana_Armature",
-  "Juana_Body",
-  "Juana_Eye_L",
-  "Juana_Eye_R",
-  "Juana_Eyebrows",
-  "Juana_Eyelashes",
-  "Juana_Hair_Close_Cut_Base",
-  "Juana_Hair_Long_Right",
-  "Juana_Outfit_Inner",
-  "Juana_Outfit_Jacket",
-  "Juana_Choker",
-  "Juana_Choker_Gold_Closure",
-  "Juana_Choker_Text_Export",
-  "Juana_Necklace_Export",
-  "Juana_Gold_Pendant",
-  "Juana_Gold_Hoop_L",
-  "Juana_Gold_Hoop_R",
+  "Juana_Production_Rig",
+  "Juana_Production_Body",
+  "Juana_Production_Head",
+  "Juana_Production_Eye_L",
+  "Juana_Production_Eye_R",
+  "Juana_Production_Eyebrows",
+  "Juana_Production_Eyelashes",
 ]);
 const REQUIRED_BONES = new Set([
   "root",
@@ -34,16 +24,20 @@ const REQUIRED_BONES = new Set([
   "eyeR",
   "jaw",
 ]);
-const REQUIRED_MORPHS = new Set([
-  "blink",
-  "blinkLeft",
-  "blinkRight",
-  "aa",
-  "ih",
-  "ou",
-  "ee",
-  "oh",
-]);
+const FORBIDDEN_DONOR_PATTERNS = [
+  /^DonorVRM_/i,
+  /SAM3D/i,
+  /Highpoly/i,
+  /Hunyuan/i,
+  /^Armature$/,
+  /^Body$/,
+  /^Head$/,
+  /^Hair_Rigid$/,
+  /^Icosphere$/,
+  /^LeftEyeMesh$/,
+  /^OutfitMesh$/,
+  /^RightEyeMesh$/,
+];
 
 function missing(required, actual) {
   const available = new Set(actual);
@@ -57,35 +51,55 @@ function exportedBoneName(blenderBoneName) {
 export function validateJuanaInspection(inspection, adapter = null) {
   const missingObjects = missing(REQUIRED_OBJECTS, inspection.objectNames);
   const requiredBones = new Set(REQUIRED_BONES);
-  const requiredMorphs = new Set(REQUIRED_MORPHS);
   if (adapter) {
     for (const boneName of Object.values(adapter.bones)) {
       requiredBones.add(exportedBoneName(boneName));
     }
-    for (const bindings of Object.values(adapter.expression_map)) {
-      for (const binding of bindings) {
-        requiredMorphs.add(binding.shape_key);
-      }
-    }
   }
   const missingBones = missing(requiredBones, inspection.boneNames);
-  const missingMorphs = missing(requiredMorphs, inspection.morphTargets);
-  if (missingObjects.length || missingBones.length || missingMorphs.length) {
+  if (missingObjects.length || missingBones.length) {
     throw new Error(
       `Provisional Juana GLB contract failed: missing objects=${JSON.stringify(
         missingObjects,
-      )}, bones=${JSON.stringify(missingBones)}, morphs=${JSON.stringify(missingMorphs)}.`,
+      )}, bones=${JSON.stringify(missingBones)}.`,
     );
   }
-  if (!Object.hasOwn(inspection.skinnedMeshes, "Juana_Body")) {
-    throw new Error("Juana_Body must load as a skinned mesh through Three.js.");
-  }
-  const bodyBones = inspection.skinnedMeshes.Juana_Body;
-  const missingBodyBones = missing(requiredBones, bodyBones);
-  if (missingBodyBones.length) {
+
+  const forbiddenObjects = inspection.objectNames.filter((name) =>
+    FORBIDDEN_DONOR_PATTERNS.some((pattern) => pattern.test(name)),
+  );
+  if (forbiddenObjects.length) {
     throw new Error(
-      `Juana_Body skin is missing required bones: ${JSON.stringify(missingBodyBones)}.`,
+      `Donor or procedural spike geometry survived the GLB export: ${JSON.stringify(
+        forbiddenObjects.sort(),
+      )}.`,
     );
+  }
+
+  const productionNames = inspection.objectNames.filter((name) =>
+    name.startsWith("Juana_Production_"),
+  );
+  const hairNames = productionNames.filter((name) => name.startsWith("Juana_Production_Hair_"));
+  const outfitNames = productionNames.filter((name) =>
+    name.startsWith("Juana_Production_Outfit_"),
+  );
+  if (!hairNames.length || !outfitNames.length) {
+    throw new Error(
+      `Production hair and outfit blockouts must survive export: hair=${hairNames.length}, ` +
+        `outfit=${outfitNames.length}.`,
+    );
+  }
+
+  for (const meshName of ["Juana_Production_Body", "Juana_Production_Head"]) {
+    if (!Object.hasOwn(inspection.skinnedMeshes, meshName)) {
+      throw new Error(`${meshName} must load as a skinned mesh through Three.js.`);
+    }
+    const missingMeshBones = missing(requiredBones, inspection.skinnedMeshes[meshName]);
+    if (missingMeshBones.length) {
+      throw new Error(
+        `${meshName} skin is missing required bones: ${JSON.stringify(missingMeshBones)}.`,
+      );
+    }
   }
 }
 
@@ -128,7 +142,8 @@ async function main() {
     provisional_boundary: {
       visual_canon_approved: false,
       final_vrm: false,
-      next_gate: "Kathy visual review",
+      expressions_deferred: true,
+      next_gate: "Kathy visual and topology review",
     },
   };
   await fs.mkdir(path.dirname(reportPath), { recursive: true });

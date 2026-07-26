@@ -15,43 +15,106 @@
     },
     "view_transform": "AgX",
     "look": "AgX - Medium High Contrast",
-    "world_color": [0.018, 0.022, 0.03, 1.0]
+    "world_color": [0.055, 0.055, 0.055, 1.0]
   },
   "views": [
     {
       "id": "front",
-      "camera_location": [0.0, -1.5, 1.42],
-      "target": [0.0, 0.0, 1.42],
-      "lens_mm": 85.0,
+      "camera_location": [0.0, -1.05, 1.5],
+      "target": [0.0, 0.0, 1.5],
+      "lens_mm": 80.0,
       "reference": "references/face/neutral-front.png"
     },
     {
       "id": "left-profile",
-      "camera_location": [1.5, 0.0, 1.42],
-      "target": [0.0, 0.0, 1.42],
-      "lens_mm": 85.0,
+      "camera_location": [1.05, 0.0, 1.5],
+      "target": [0.0, 0.0, 1.5],
+      "lens_mm": 80.0,
       "reference": "references/face/left-profile.png"
     },
     {
       "id": "right-profile",
-      "camera_location": [-1.5, 0.0, 1.42],
-      "target": [0.0, 0.0, 1.42],
-      "lens_mm": 85.0,
+      "camera_location": [-1.05, 0.0, 1.5],
+      "target": [0.0, 0.0, 1.5],
+      "lens_mm": 80.0,
       "reference": "references/face/right-profile.png"
     },
     {
       "id": "left-three-quarter",
-      "camera_location": [1.061, -1.061, 1.42],
-      "target": [0.0, 0.0, 1.42],
-      "lens_mm": 85.0,
+      "camera_location": [0.7424, -0.7424, 1.5],
+      "target": [0.0, 0.0, 1.5],
+      "lens_mm": 80.0,
       "reference": "references/face/left-three-quarter.png"
     },
     {
       "id": "right-three-quarter",
-      "camera_location": [-1.061, -1.061, 1.42],
-      "target": [0.0, 0.0, 1.42],
-      "lens_mm": 85.0,
+      "camera_location": [-0.7424, -0.7424, 1.5],
+      "target": [0.0, 0.0, 1.5],
+      "lens_mm": 80.0,
       "reference": "references/face/right-three-quarter.png"
     }
-  ]
+  ],
+  "review_presentation": {
+    "revision": "gh-22-clean-production-pass-2",
+    "crop": "head_neck_and_shoulder_hint",
+    "neutral_lighting": true,
+    "hide_construction_marks": true,
+    "saved_blend": {
+      "active_camera": "Camera_front",
+      "visible_collections": [
+        "_PRODUCTION_BODY",
+        "_PRODUCTION_HEAD",
+        "_PRODUCTION_HAIR",
+        "_PRODUCTION_OUTFIT"
+      ],
+      "hidden_collections": [
+        "_REFERENCE_SAM3D",
+        "_REFERENCE_HIGHPOLY",
+        "_DONOR_VRM",
+        "_RIG",
+        "_EXPORT"
+      ]
+    },
+    "landmark_overlay": {
+      "enabled": true,
+      "opacity": 0.28,
+      "landmarks": {
+        "eyes": {
+          "reference": [[0.4, 0.43], [0.61, 0.43]],
+          "render": [[0.39, 0.44], [0.62, 0.44]]
+        },
+        "brows": {
+          "reference": [[0.4, 0.37], [0.62, 0.37]],
+          "render": [[0.39, 0.36], [0.62, 0.36]]
+        },
+        "nose_base": {
+          "reference": [[0.47, 0.55], [0.54, 0.55]],
+          "render": [[0.47, 0.58], [0.54, 0.58]]
+        },
+        "mouth_corners": {
+          "reference": [[0.43, 0.64], [0.59, 0.64]],
+          "render": [[0.43, 0.65], [0.58, 0.65]]
+        },
+        "chin": {
+          "reference": [[0.51, 0.76]],
+          "render": [[0.5, 0.76]]
+        },
+        "cheekbones": {
+          "reference": [[0.33, 0.5], [0.69, 0.5]],
+          "render": [[0.34, 0.52], [0.68, 0.52]]
+        },
+        "hairline": {
+          "reference": [[0.39, 0.27], [0.65, 0.27]],
+          "render": [[0.39, 0.23], [0.66, 0.23]]
+        }
+      }
+    }
+  },
+  "diagnostics": {
+    "wireframe": "wireframe.png",
+    "sam3d_reference_body": "sam3d-reference-body.png",
+    "production_body": "production-body.png",
+    "highpoly_reference_head": "highpoly-reference-head.png",
+    "production_head": "production-head.png"
+  }
 }

@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "character_id": "juana",
+  "scenario_id": "juana-diorama-room",
+  "status": "approved_runtime_slice",
+  "approval": {
+    "approved_by": "Katherine E. Aguirre",
+    "approved_on": "2026-07-23",
+    "scope": "Composition, scale, pose, depth, foreground occlusion, shared lighting, shared color grade, and the absence of clothing color patches."
+  },
+  "rights": {
+    "rights_holder": "Katherine E. Aguirre",
+    "authorship": "Original creative direction and prompts by Katherine E. Aguirre with ChatGPT-assisted image generation.",
+    "license": "Proprietary - all rights reserved",
+    "commercial_use": true,
+    "modification_allowed": true,
+    "redistribution_allowed": true,
+    "attestation": "Rights and source statements were supplied by the rights holder and were not independently audited."
+  },
+  "likeness": {
+    "subject": "Katherine E. Aguirre",
+    "relationship": "Juana is inspired by the rights holder's own likeness.",
+    "self_consent": true
+  },
+  "generation": {
+    "provider": "OpenAI",
+    "product": "ChatGPT image generation",
+    "model": "Not recorded by the interactive generator",
+    "method": "Iterative user-directed concept generation and visual approval."
+  },
+  "direct_inputs": {
+    "empty_room": {
+      "path": "output/authoring/juana-talking-bust-v2-pixel/preview/environment/juana-diorama-room.png",
+      "role": "Project-owned diorama room, camera, props, and lighting reference",
+      "sha256": "2d51d649321a96d6aa8346b4f91cde380e052a04d27244532f0bacd21e01cce1",
+      "byte_length": 1772612,
+      "width": 1031,
+      "height": 1525
+    },
+    "juana_neutral_reference": {
+      "path": "output/authoring/juana-talking-bust-v2-pixel/review/panels/presence-states/presence-neutral.png",
+      "role": "Approved Juana identity, palette, and hair-orientation reference",
+      "sha256": "6111e3ed857c4986dc6502c41467061754dde5ebcf3c7999a7007f6430430090",
+      "byte_length": 33393,
+      "width": 512,
+      "height": 512
+    },
+    "visual_integration_reference": {
+      "role": "User-supplied lighting and scene-integration reference; not copied into the repository or publication bundle"
+    }
+  },
+  "approved_outputs": {
+    "integrated_neutral": {
+      "path": "output/experiments/juana-baked-diorama-v1/juana-baked-diorama-approved.png",
+      "sha256": "15e45d57ffeb32cfc09e242c622d3ef862b7579c3195ffaf4dd2406f3047eda4",
+      "byte_length": 1954877,
+      "width": 1032,
+      "height": 1523
+    }
+  },
+  "deferred": [
+    "Procedural arm and hand motion",
+    "Head tilting and face-touch gestures",
+    "Additional integrated poses"
+  ]
+}

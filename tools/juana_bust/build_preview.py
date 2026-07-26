@@ -21,6 +21,22 @@ REQUIRED_VIEW_IDS = (
     "left-three-quarter",
     "right-three-quarter",
 )
+DIAGNOSTIC_RENDER_IDS = (
+    "wireframe",
+    "sam3d-reference-body",
+    "production-body",
+    "highpoly-reference-head",
+    "production-head",
+)
+REQUIRED_LANDMARKS = {
+    "eyes",
+    "brows",
+    "nose_base",
+    "mouth_corners",
+    "chin",
+    "cheekbones",
+    "hairline",
+}
 
 
 class IntegrityError(RuntimeError):
@@ -170,7 +186,7 @@ def verify_source_inputs(
     repository_root: Path = REPOSITORY_ROOT,
     evidence_path: Path = TOOL_ROOT / "source-evidence.json",
 ) -> list[dict[str, str | int]]:
-    """Verify the approved Juana master and every view used by the checkpoint."""
+    """Verify approved Juana references and the normalized SAM 3D reference."""
     evidence = load_json_object(evidence_path)
     master = evidence["master_reference"]
     verified = [
@@ -181,6 +197,20 @@ def verify_source_inputs(
             expected_byte_length=master["byte_length"],
         )
     ]
+    sam3d_donor = next(
+        donor
+        for donor in evidence["donors"]
+        if donor["id"] == "juana-sam3d-humanmesh-donor"
+    )
+    derived_reference = sam3d_donor["derived_reference"]
+    verified.append(
+        verify_file(
+            repository_root / derived_reference["path"],
+            artifact_id="juana-sam3d-humanmesh-normalized-reference",
+            expected_sha256=derived_reference["sha256"],
+            expected_byte_length=derived_reference["byte_length"],
+        )
+    )
     package_root = repository_root / evidence["approved_package"]["path"]
     for reference in evidence["face_references"]:
         verified.append(
@@ -202,6 +232,31 @@ def verify_source_inputs(
                     else family_evidence[f"{view}_sha256"],
                 )
             )
+    return verified
+
+
+def verify_donor_inputs(
+    repository_root: Path = REPOSITORY_ROOT,
+    evidence_path: Path = TOOL_ROOT / "source-evidence.json",
+) -> list[dict[str, str | int]]:
+    """Fail closed unless every raw donor matches its pinned digest and size."""
+    evidence = load_json_object(evidence_path)
+    verified = []
+    for donor in evidence["donors"]:
+        configured_path = Path(donor["local_path"])
+        source_path = (
+            configured_path
+            if configured_path.is_absolute()
+            else repository_root / configured_path
+        )
+        verified.append(
+            verify_file(
+                source_path,
+                artifact_id=donor["id"],
+                expected_sha256=donor["sha256"],
+                expected_byte_length=donor["byte_length"],
+            )
+        )
     return verified
 
 
@@ -233,6 +288,38 @@ def validate_render_manifest(manifest: dict[str, Any]) -> None:
             or not isinstance(view.get("reference"), str)
         ):
             raise ValueError(f"Render view {view.get('id')} is incomplete.")
+    presentation = manifest.get("review_presentation")
+    if not isinstance(presentation, dict):
+        raise ValueError("Render manifest must declare the GH-22 review presentation.")
+    overlay = presentation.get("landmark_overlay")
+    if not isinstance(overlay, dict) or overlay.get("enabled") is not True:
+        raise ValueError("Review presentation must enable the optional landmark output.")
+    opacity = overlay.get("opacity")
+    if not isinstance(opacity, int | float) or isinstance(opacity, bool) or not 0.0 < opacity < 1.0:
+        raise ValueError("Landmark overlay opacity must be between zero and one.")
+    landmarks = overlay.get("landmarks")
+    if not isinstance(landmarks, dict) or set(landmarks) != REQUIRED_LANDMARKS:
+        raise ValueError(f"Landmark overlay must declare exactly {sorted(REQUIRED_LANDMARKS)}.")
+    for name, panel_points in landmarks.items():
+        if not isinstance(panel_points, dict) or set(panel_points) != {"reference", "render"}:
+            raise ValueError(f"Landmark group {name} must declare reference and render points.")
+        for panel, points in panel_points.items():
+            if not isinstance(points, list) or not points:
+                raise ValueError(f"Landmark group {name} must contain normalized {panel} points.")
+            for point in points:
+                if (
+                    not isinstance(point, list)
+                    or len(point) != 2
+                    or any(
+                        not isinstance(coordinate, int | float)
+                        or isinstance(coordinate, bool)
+                        or not 0.0 <= coordinate <= 1.0
+                        for coordinate in point
+                    )
+                ):
+                    raise ValueError(
+                        f"Landmark group {name} contains an invalid {panel} point: {point}."
+                    )
 
 
 def canonicalize_render(path: Path, *, rgb_lsb_bits_cleared: int = 2) -> None:
@@ -260,7 +347,7 @@ def canonicalize_renders(
     rgb_lsb_bits_cleared: int,
 ) -> None:
     """Canonicalize every required render before validation and comparison."""
-    for view_id in REQUIRED_VIEW_IDS:
+    for view_id in (*REQUIRED_VIEW_IDS, *DIAGNOSTIC_RENDER_IDS):
         canonicalize_render(
             renders_root / f"{view_id}.png",
             rgb_lsb_bits_cleared=rgb_lsb_bits_cleared,
@@ -281,6 +368,49 @@ def _comparison_image(
     if normalized.size != (1024, 1024):
         normalized = normalized.resize((1024, 1024), Image.Resampling.LANCZOS)
     return normalized
+
+
+def _landmark_overlay_image(
+    comparison: Image.Image,
+    overlay_contract: dict[str, Any],
+) -> Image.Image:
+    opacity = int(round(float(overlay_contract["opacity"]) * 255))
+    overlay = Image.new("RGBA", comparison.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+    colors = {
+        "eyes": (65, 210, 255, opacity),
+        "brows": (255, 195, 55, opacity),
+        "nose_base": (255, 105, 105, opacity),
+        "mouth_corners": (255, 90, 190, opacity),
+        "chin": (155, 115, 255, opacity),
+        "cheekbones": (80, 230, 155, opacity),
+        "hairline": (255, 145, 55, opacity),
+    }
+    for panel_x, panel in ((0, "reference"), (1024, "render")):
+        for name, panel_points in overlay_contract["landmarks"].items():
+            color = colors[name]
+            points = panel_points[panel]
+            projected = [
+                (
+                    panel_x + int(round(float(point[0]) * 1024)),
+                    48 + int(round(float(point[1]) * 1024)),
+                )
+                for point in points
+            ]
+            if len(projected) > 1:
+                draw.line(projected, fill=color, width=3)
+            for x, y in projected:
+                radius = 9
+                draw.ellipse(
+                    (x - radius, y - radius, x + radius, y + radius),
+                    outline=color,
+                    width=3,
+                )
+                draw.line((x - 13, y, x + 13, y), fill=color, width=2)
+                draw.line((x, y - 13, x, y + 13), fill=color, width=2)
+            first_x, first_y = projected[0]
+            draw.text((first_x + 12, first_y - 18), name.replace("_", " "), fill=color)
+    return Image.alpha_composite(comparison.convert("RGBA"), overlay).convert("RGB")
 
 
 def create_comparison_sheets(
@@ -313,6 +443,18 @@ def create_comparison_sheets(
         output = comparisons_root / f"{view_id}-comparison.png"
         comparison.save(output, format="PNG", optimize=False)
         outputs[view_id] = output
+        overlay_contract = manifest.get("review_presentation", {}).get(
+            "landmark_overlay",
+            {},
+        )
+        if view_id == "front" and overlay_contract.get("enabled") is True:
+            overlay_output = comparisons_root / "front-landmark-overlay.png"
+            _landmark_overlay_image(comparison, overlay_contract).save(
+                overlay_output,
+                format="PNG",
+                optimize=False,
+            )
+            outputs["front-landmark-overlay"] = overlay_output
 
         column = index % 2
         row = index // 2
@@ -338,19 +480,68 @@ def create_comparison_sheets(
     return outputs
 
 
+def _donor_transfer_comparison(
+    left_path: Path,
+    right_path: Path,
+    output_path: Path,
+    *,
+    left_label: str,
+    right_label: str,
+) -> Path:
+    left = _comparison_image(left_path, require_render_dimensions=True)
+    right = _comparison_image(right_path, require_render_dimensions=True)
+    comparison = Image.new("RGB", (2048, 1072), (14, 15, 18))
+    comparison.paste(left, (0, 48))
+    comparison.paste(right, (1024, 48))
+    draw = ImageDraw.Draw(comparison)
+    draw.text((16, 16), left_label, fill=(238, 240, 244))
+    draw.text((1040, 16), right_label, fill=(238, 240, 244))
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    comparison.save(output_path, format="PNG", optimize=False)
+    return output_path
+
+
+def create_donor_transfer_comparisons(
+    *,
+    renders_root: Path,
+    comparisons_root: Path,
+) -> dict[str, Path]:
+    """Create fixed evidence sheets for body and head donor transfer."""
+    return {
+        "sam3d-vs-production-body": _donor_transfer_comparison(
+            renders_root / "sam3d-reference-body.png",
+            renders_root / "production-body.png",
+            comparisons_root / "sam3d-vs-production-body.png",
+            left_label="normalized SAM 3D HumanMesh donor",
+            right_label="single rig-compatible production body",
+        ),
+        "highpoly-vs-production-head": _donor_transfer_comparison(
+            renders_root / "highpoly-reference-head.png",
+            renders_root / "production-head.png",
+            comparisons_root / "highpoly-vs-production-head.png",
+            left_label="immutable high-poly likeness donor",
+            right_label="single rig-compatible production head",
+        ),
+    }
+
+
 def provisional_output_paths(repository_root: Path = REPOSITORY_ROOT) -> dict[str, Path]:
     """Return all primary outputs, intentionally outside the final distribution path."""
-    root = repository_root / "build" / "juana-bust-preview"
+    root = repository_root / "build" / "juana-clean-production-preview"
     return {
         "root": root,
-        "blend": root / "juana-bust-provisional.blend",
-        "glb": root / "juana-bust-provisional.glb",
+        "blend": root / "juana-clean-production-provisional.blend",
+        "glb": root / "juana-clean-production-provisional.glb",
         "scene_report": root / "scene-report.json",
+        "fit_report": root / "production-fit-report.json",
+        "inventory": root / "exported-mesh-inventory.json",
         "blender_validation": root / "blender-validation.json",
         "inspection_report": root / "three-inspection.json",
         "build_report": root / "build-report.json",
         "renders": root / "renders",
         "comparisons": root / "comparisons",
+        "sam_body_comparison": root / "comparisons" / "sam3d-vs-production-body.png",
+        "highpoly_head_comparison": root / "comparisons" / "highpoly-vs-production-head.png",
     }
 
 
@@ -391,6 +582,7 @@ def _write_build_report(
     repository_root: Path,
     verified_toolchain: list[dict[str, str | int]],
     verified_sources: list[dict[str, str | int]],
+    verified_donors: list[dict[str, str | int]],
     comparisons: dict[str, Path],
     render_manifest: dict[str, Any],
 ) -> None:
@@ -398,9 +590,14 @@ def _write_build_report(
         paths["blend"],
         paths["glb"],
         paths["scene_report"],
+        paths["fit_report"],
+        paths["inventory"],
         paths["blender_validation"],
         paths["inspection_report"],
-        *(paths["renders"] / f"{view_id}.png" for view_id in REQUIRED_VIEW_IDS),
+        *(
+            paths["renders"] / f"{view_id}.png"
+            for view_id in (*REQUIRED_VIEW_IDS, *DIAGNOSTIC_RENDER_IDS)
+        ),
         *comparisons.values(),
     ]
     report = {
@@ -409,9 +606,11 @@ def _write_build_report(
         "ticket": "GH-22",
         "character_id": "juana",
         "toolchain_inputs_verified": len(verified_toolchain),
-        "approved_source_images_verified": len(verified_sources),
+        "approved_source_inputs_verified": len(verified_sources),
+        "raw_donor_inputs_verified": len(verified_donors),
         "render_contract": {
             "view_ids": list(REQUIRED_VIEW_IDS),
+            "diagnostic_ids": list(DIAGNOSTIC_RENDER_IDS),
             "resolution": render_manifest["render"]["resolution"],
             "canonicalization": render_manifest["render"]["canonicalization"],
         },
@@ -422,7 +621,7 @@ def _write_build_report(
             "visual_canon_approved": False,
             "final_vrm": False,
             "distribution_path": None,
-            "next_gate": "Kathy visual review",
+            "next_gate": "Kathy visual and topology review",
         },
     }
     paths["build_report"].write_text(
@@ -453,6 +652,7 @@ def main() -> None:
 
     verified_toolchain = verify_locked_inputs(repository_root)
     verified_sources = verify_source_inputs(repository_root)
+    verified_donors = verify_donor_inputs(repository_root)
     render_manifest = load_json_object(TOOL_ROOT / "render-manifest.json")
     validate_render_manifest(render_manifest)
 
@@ -474,7 +674,7 @@ def main() -> None:
                 "--python-exit-code",
                 "1",
                 "--python",
-                str(TOOL_ROOT / "blender_author_preview.py"),
+                str(TOOL_ROOT / "blender_author_clean_production.py"),
                 "--",
                 "--repo-root",
                 str(repository_root),
@@ -502,7 +702,7 @@ def main() -> None:
             "--python-exit-code",
             "1",
             "--python",
-            str(TOOL_ROOT / "blender_validate_preview.py"),
+            str(TOOL_ROOT / "blender_validate_clean_production.py"),
             "--",
             "--report",
             str(paths["blender_validation"]),
@@ -533,11 +733,18 @@ def main() -> None:
         renders_root=paths["renders"],
         comparisons_root=paths["comparisons"],
     )
+    comparisons.update(
+        create_donor_transfer_comparisons(
+            renders_root=paths["renders"],
+            comparisons_root=paths["comparisons"],
+        )
+    )
     _write_build_report(
         paths,
         repository_root=repository_root,
         verified_toolchain=verified_toolchain,
         verified_sources=verified_sources,
+        verified_donors=verified_donors,
         comparisons=comparisons,
         render_manifest=render_manifest,
     )

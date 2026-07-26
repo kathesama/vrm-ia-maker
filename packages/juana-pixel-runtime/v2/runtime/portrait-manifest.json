@@ -1,0 +1,587 @@
+{
+  "canvas": {
+    "alpha_mode": "blend",
+    "height": 512,
+    "integer_scale": 2,
+    "logical_height": 256,
+    "logical_width": 256,
+    "pivot": [
+      256,
+      500
+    ],
+    "texture_filter": "nearest",
+    "width": 512
+  },
+  "character_id": "juana",
+  "default_scenario": "juana-diorama-room",
+  "environment": {
+    "height": 1525,
+    "path": "environment/juana-diorama-room.png",
+    "role": "static-diorama-background",
+    "width": 1031
+  },
+  "fallbacks": {
+    "missing_state": "neutral",
+    "speaking": "explaining"
+  },
+  "package_id": "juana-talking-bust-v2-pixel",
+  "patches": {
+    "eyes": {
+      "frames": {
+        "blink-left": {
+          "path": "patches/eyes/blink-left.png"
+        },
+        "blink-right": {
+          "path": "patches/eyes/blink-right.png"
+        },
+        "closed": {
+          "path": "patches/eyes/closed.png"
+        },
+        "open": {
+          "path": "patches/eyes/open.png"
+        }
+      },
+      "order": [
+        "open",
+        "closed",
+        "blink-left",
+        "blink-right"
+      ],
+      "rect": {
+        "height": 54,
+        "width": 212,
+        "x": 150,
+        "y": 164
+      }
+    },
+    "mouth": {
+      "frames": {
+        "aa": {
+          "path": "patches/mouth/aa.png"
+        },
+        "ee": {
+          "path": "patches/mouth/ee.png"
+        },
+        "ih": {
+          "path": "patches/mouth/ih.png"
+        },
+        "neutral": {
+          "path": "patches/mouth/neutral.png"
+        },
+        "oh": {
+          "path": "patches/mouth/oh.png"
+        },
+        "ou": {
+          "path": "patches/mouth/ou.png"
+        }
+      },
+      "order": [
+        "neutral",
+        "aa",
+        "ih",
+        "ou",
+        "ee",
+        "oh"
+      ],
+      "rect": {
+        "height": 64,
+        "width": 80,
+        "x": 216,
+        "y": 246
+      }
+    }
+  },
+  "provisional": true,
+  "recommended_ui_scenario": "juana-diorama-room",
+  "reduced_motion": {
+    "disable": [
+      "parallax",
+      "particles",
+      "ambient-bob",
+      "dither-duration"
+    ],
+    "preserve": [
+      "state",
+      "eye-patch",
+      "mouth-patch"
+    ]
+  },
+  "scenario_order": [
+    "juana-diorama-room",
+    "juana-workstation"
+  ],
+  "scenarios": {
+    "juana-diorama-room": {
+      "approval_status": "approved_runtime_slice",
+      "canvas": {
+        "alpha_mode": "blend",
+        "height": 1523,
+        "texture_filter": "nearest",
+        "width": 1032
+      },
+      "default_state": "neutral",
+      "facial_state_rect": {
+        "height": 132,
+        "width": 148,
+        "x": 442,
+        "y": 423
+      },
+      "fallbacks": {
+        "missing_state": "neutral",
+        "speaking": "explaining"
+      },
+      "label": "Approved diorama",
+      "patches": {
+        "eyes": {
+          "frames": {
+            "blink-left": {
+              "path": "scenarios/juana-diorama-room/patches/eyes/blink-left.png",
+              "source_asset": "output/experiments/juana-baked-diorama-v1/animation-sources/eyes-closed-v1.png"
+            },
+            "blink-right": {
+              "path": "scenarios/juana-diorama-room/patches/eyes/blink-right.png",
+              "source_asset": "output/experiments/juana-baked-diorama-v1/animation-sources/eyes-closed-v1.png"
+            },
+            "closed": {
+              "path": "scenarios/juana-diorama-room/patches/eyes/closed.png",
+              "source_asset": "output/experiments/juana-baked-diorama-v1/animation-sources/eyes-closed-v1.png"
+            },
+            "open": {
+              "path": "scenarios/juana-diorama-room/patches/eyes/open.png",
+              "source_asset": "output/experiments/juana-baked-diorama-v1/juana-baked-diorama-approved.png"
+            }
+          },
+          "order": [
+            "open",
+            "closed",
+            "blink-left",
+            "blink-right"
+          ],
+          "rect": {
+            "height": 1523,
+            "width": 1032,
+            "x": 0,
+            "y": 0
+          },
+          "source_rect": {
+            "height": 46,
+            "width": 142,
+            "x": 444,
+            "y": 448
+          },
+          "source_scenario": "juana-diorama-room"
+        },
+        "mouth": {
+          "frames": {
+            "aa": {
+              "path": "scenarios/juana-diorama-room/patches/mouth/aa.png",
+              "source_asset": "output/experiments/juana-baked-diorama-v1/animation-sources/state-explaining-v1.png"
+            },
+            "ee": {
+              "path": "scenarios/juana-diorama-room/patches/mouth/ee.png",
+              "source_asset": "output/experiments/juana-baked-diorama-v1/animation-sources/state-approval-v1.png"
+            },
+            "ih": {
+              "path": "scenarios/juana-diorama-room/patches/mouth/ih.png",
+              "source_asset": "output/experiments/juana-baked-diorama-v1/animation-sources/state-doubt-v1.png"
+            },
+            "neutral": {
+              "path": "scenarios/juana-diorama-room/patches/mouth/neutral.png",
+              "source_asset": "output/experiments/juana-baked-diorama-v1/juana-baked-diorama-approved.png"
+            },
+            "oh": {
+              "path": "scenarios/juana-diorama-room/patches/mouth/oh.png",
+              "source_asset": "output/experiments/juana-baked-diorama-v1/animation-sources/state-error-v1.png"
+            },
+            "ou": {
+              "path": "scenarios/juana-diorama-room/patches/mouth/ou.png",
+              "source_asset": "output/experiments/juana-baked-diorama-v1/animation-sources/state-thinking-v1.png"
+            }
+          },
+          "order": [
+            "neutral",
+            "aa",
+            "ih",
+            "ou",
+            "ee",
+            "oh"
+          ],
+          "rect": {
+            "height": 1523,
+            "width": 1032,
+            "x": 0,
+            "y": 0
+          },
+          "source_rect": {
+            "height": 60,
+            "width": 90,
+            "x": 468,
+            "y": 505
+          },
+          "source_scenario": "juana-diorama-room"
+        }
+      },
+      "provenance": "scenarios/juana-diorama-room/provenance.json",
+      "reduced_motion": {
+        "disable": [
+          "parallax",
+          "particles",
+          "ambient-bob",
+          "dither-duration"
+        ],
+        "preserve": [
+          "state",
+          "eye-patch",
+          "mouth-patch"
+        ]
+      },
+      "render_mode": "baked-scene",
+      "state_order": [
+        "neutral",
+        "listening",
+        "thinking",
+        "explaining",
+        "approval",
+        "doubt",
+        "error"
+      ],
+      "states": {
+        "approval": {
+          "approval_status": "provisional_review",
+          "description": "Warm agreement and reassurance.",
+          "facial_patches": false,
+          "label": "Approval",
+          "path": "scenarios/juana-diorama-room/states/approval.png",
+          "source_asset": "output/experiments/juana-baked-diorama-v1/animation-sources/state-approval-v1.png",
+          "speaking": false
+        },
+        "doubt": {
+          "approval_status": "provisional_review",
+          "description": "Concerned and requesting more clarity.",
+          "facial_patches": false,
+          "label": "Doubt",
+          "path": "scenarios/juana-diorama-room/states/doubt.png",
+          "source_asset": "output/experiments/juana-baked-diorama-v1/animation-sources/state-doubt-v1.png",
+          "speaking": false
+        },
+        "error": {
+          "approval_status": "provisional_review",
+          "description": "Calmly signals that recovery is needed.",
+          "facial_patches": false,
+          "label": "Error",
+          "path": "scenarios/juana-diorama-room/states/error.png",
+          "source_asset": "output/experiments/juana-baked-diorama-v1/animation-sources/state-error-v1.png",
+          "speaking": false
+        },
+        "explaining": {
+          "approval_status": "provisional_review",
+          "description": "Actively articulating a response.",
+          "facial_patches": false,
+          "label": "Explaining",
+          "path": "scenarios/juana-diorama-room/states/explaining.png",
+          "source_asset": "output/experiments/juana-baked-diorama-v1/animation-sources/state-explaining-v1.png",
+          "speaking": true
+        },
+        "listening": {
+          "approval_status": "provisional_review",
+          "description": "Relaxed and attentive.",
+          "facial_patches": false,
+          "label": "Listening",
+          "path": "scenarios/juana-diorama-room/states/listening.png",
+          "source_asset": "output/experiments/juana-baked-diorama-v1/animation-sources/state-listening-v1.png",
+          "speaking": false
+        },
+        "neutral": {
+          "approval_status": "approved_runtime_slice",
+          "description": "Approved integrated neutral composition.",
+          "facial_patches": true,
+          "label": "Neutral",
+          "path": "scenarios/juana-diorama-room/states/neutral.png",
+          "speaking": true
+        },
+        "thinking": {
+          "approval_status": "provisional_review",
+          "description": "Reflective gaze while processing.",
+          "facial_patches": false,
+          "label": "Thinking",
+          "path": "scenarios/juana-diorama-room/states/thinking.png",
+          "source_asset": "output/experiments/juana-baked-diorama-v1/animation-sources/state-thinking-v1.png",
+          "speaking": false
+        }
+      },
+      "transitions": {
+        "method": "ordered-dither-4x4",
+        "state_ms": 150
+      }
+    },
+    "juana-workstation": {
+      "approval_status": "approved_runtime_slice",
+      "canvas": {
+        "alpha_mode": "blend",
+        "height": 1536,
+        "texture_filter": "nearest",
+        "width": 1024
+      },
+      "default_state": "neutral",
+      "facial_state_rect": {
+        "height": 144,
+        "width": 170,
+        "x": 410,
+        "y": 500
+      },
+      "fallbacks": {
+        "missing_state": "neutral",
+        "speaking": "explaining"
+      },
+      "label": "Workstation",
+      "patches": {
+        "eyes": {
+          "frames": {
+            "blink-left": {
+              "path": "scenarios/juana-workstation/patches/eyes/blink-left.png",
+              "source_asset": "output/experiments/juana-scenario-2-workstation-v1/animation-sources/eyes-closed-v1.png"
+            },
+            "blink-right": {
+              "path": "scenarios/juana-workstation/patches/eyes/blink-right.png",
+              "source_asset": "output/experiments/juana-scenario-2-workstation-v1/animation-sources/eyes-closed-v1.png"
+            },
+            "closed": {
+              "path": "scenarios/juana-workstation/patches/eyes/closed.png",
+              "source_asset": "output/experiments/juana-scenario-2-workstation-v1/animation-sources/eyes-closed-v1.png"
+            },
+            "open": {
+              "path": "scenarios/juana-workstation/patches/eyes/open.png",
+              "source_asset": "output/experiments/juana-scenario-2-workstation-v1/juana-scenario-2-seated-concept-v1.png"
+            }
+          },
+          "order": [
+            "open",
+            "closed",
+            "blink-left",
+            "blink-right"
+          ],
+          "rect": {
+            "height": 1536,
+            "width": 1024,
+            "x": 0,
+            "y": 0
+          },
+          "source_rect": {
+            "height": 70,
+            "width": 170,
+            "x": 410,
+            "y": 510
+          },
+          "source_scenario": "juana-workstation"
+        },
+        "mouth": {
+          "frames": {
+            "aa": {
+              "path": "scenarios/juana-workstation/patches/mouth/aa.png",
+              "source_asset": "output/experiments/juana-scenario-2-workstation-v1/animation-sources/state-explaining-v1.png"
+            },
+            "ee": {
+              "path": "scenarios/juana-workstation/patches/mouth/ee.png",
+              "source_asset": "output/experiments/juana-scenario-2-workstation-v1/animation-sources/state-approval-v1.png"
+            },
+            "ih": {
+              "path": "scenarios/juana-workstation/patches/mouth/ih.png",
+              "source_asset": "output/experiments/juana-scenario-2-workstation-v1/animation-sources/state-doubt-v1.png"
+            },
+            "neutral": {
+              "path": "scenarios/juana-workstation/patches/mouth/neutral.png",
+              "source_asset": "output/experiments/juana-scenario-2-workstation-v1/juana-scenario-2-seated-concept-v1.png"
+            },
+            "oh": {
+              "path": "scenarios/juana-workstation/patches/mouth/oh.png",
+              "source_asset": "output/experiments/juana-scenario-2-workstation-v1/animation-sources/state-error-v1.png"
+            },
+            "ou": {
+              "path": "scenarios/juana-workstation/patches/mouth/ou.png",
+              "source_asset": "output/experiments/juana-scenario-2-workstation-v1/animation-sources/state-thinking-v1.png"
+            }
+          },
+          "order": [
+            "neutral",
+            "aa",
+            "ih",
+            "ou",
+            "ee",
+            "oh"
+          ],
+          "rect": {
+            "height": 1536,
+            "width": 1024,
+            "x": 0,
+            "y": 0
+          },
+          "source_rect": {
+            "height": 64,
+            "width": 106,
+            "x": 450,
+            "y": 590
+          },
+          "source_scenario": "juana-workstation"
+        }
+      },
+      "provenance": "scenarios/juana-workstation/provenance.json",
+      "reduced_motion": {
+        "disable": [
+          "parallax",
+          "particles",
+          "ambient-bob",
+          "dither-duration"
+        ],
+        "preserve": [
+          "state",
+          "eye-patch",
+          "mouth-patch"
+        ]
+      },
+      "render_mode": "baked-scene",
+      "state_order": [
+        "neutral",
+        "listening",
+        "thinking",
+        "explaining",
+        "approval",
+        "doubt",
+        "error"
+      ],
+      "states": {
+        "approval": {
+          "approval_status": "provisional_review",
+          "description": "Warm agreement and reassurance.",
+          "facial_patches": false,
+          "label": "Approval",
+          "path": "scenarios/juana-workstation/states/approval.png",
+          "source_asset": "output/experiments/juana-scenario-2-workstation-v1/animation-sources/state-approval-v1.png",
+          "speaking": false
+        },
+        "doubt": {
+          "approval_status": "provisional_review",
+          "description": "Concerned and requesting more clarity.",
+          "facial_patches": false,
+          "label": "Doubt",
+          "path": "scenarios/juana-workstation/states/doubt.png",
+          "source_asset": "output/experiments/juana-scenario-2-workstation-v1/animation-sources/state-doubt-v1.png",
+          "speaking": false
+        },
+        "error": {
+          "approval_status": "provisional_review",
+          "description": "Calmly signals that recovery is needed.",
+          "facial_patches": false,
+          "label": "Error",
+          "path": "scenarios/juana-workstation/states/error.png",
+          "source_asset": "output/experiments/juana-scenario-2-workstation-v1/animation-sources/state-error-v1.png",
+          "speaking": false
+        },
+        "explaining": {
+          "approval_status": "provisional_review",
+          "description": "Actively articulating a response.",
+          "facial_patches": false,
+          "label": "Explaining",
+          "path": "scenarios/juana-workstation/states/explaining.png",
+          "source_asset": "output/experiments/juana-scenario-2-workstation-v1/animation-sources/state-explaining-v1.png",
+          "speaking": true
+        },
+        "listening": {
+          "approval_status": "provisional_review",
+          "description": "Relaxed and attentive.",
+          "facial_patches": false,
+          "label": "Listening",
+          "path": "scenarios/juana-workstation/states/listening.png",
+          "source_asset": "output/experiments/juana-scenario-2-workstation-v1/animation-sources/state-listening-v1.png",
+          "speaking": false
+        },
+        "neutral": {
+          "approval_status": "approved_runtime_slice",
+          "description": "Approved integrated neutral composition.",
+          "facial_patches": true,
+          "label": "Neutral",
+          "path": "scenarios/juana-workstation/states/neutral.png",
+          "speaking": true
+        },
+        "thinking": {
+          "approval_status": "provisional_review",
+          "description": "Reflective gaze while processing.",
+          "facial_patches": false,
+          "label": "Thinking",
+          "path": "scenarios/juana-workstation/states/thinking.png",
+          "source_asset": "output/experiments/juana-scenario-2-workstation-v1/animation-sources/state-thinking-v1.png",
+          "speaking": false
+        }
+      },
+      "transitions": {
+        "method": "ordered-dither-4x4",
+        "state_ms": 150
+      }
+    }
+  },
+  "schema_version": "2.0",
+  "source_package_sealed": false,
+  "state_order": [
+    "neutral",
+    "listening",
+    "thinking",
+    "explaining",
+    "approval",
+    "doubt",
+    "error"
+  ],
+  "states": {
+    "approval": {
+      "description": "Signals gentle agreement.",
+      "facial_patches": false,
+      "label": "Approval",
+      "path": "states/approval.png",
+      "speaking": true
+    },
+    "doubt": {
+      "description": "Requests more clarity.",
+      "facial_patches": false,
+      "label": "Doubt",
+      "path": "states/doubt.png",
+      "speaking": true
+    },
+    "error": {
+      "description": "Signals calm recovery.",
+      "facial_patches": false,
+      "label": "Error",
+      "path": "states/error.png",
+      "speaking": true
+    },
+    "explaining": {
+      "description": "Explains with clarity.",
+      "facial_patches": true,
+      "label": "Explaining",
+      "path": "states/explaining.png",
+      "speaking": true
+    },
+    "listening": {
+      "alias": "neutral",
+      "description": "Neutral visual alias for listening.",
+      "facial_patches": true,
+      "label": "Listening",
+      "speaking": false
+    },
+    "neutral": {
+      "description": "Attentive and available.",
+      "facial_patches": true,
+      "label": "Neutral",
+      "path": "states/neutral.png",
+      "speaking": true
+    },
+    "thinking": {
+      "description": "Processes information.",
+      "facial_patches": false,
+      "label": "Thinking",
+      "path": "states/thinking.png",
+      "speaking": false
+    }
+  },
+  "transitions": {
+    "method": "ordered-dither-4x4",
+    "state_ms": 150
+  }
+}

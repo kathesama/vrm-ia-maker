@@ -138,6 +138,53 @@ Marketplace terms must be reviewed for commercial use, modification, redistribut
 - Asset records may be committed without committing restricted asset bytes.
 - Secrets, purchase receipts, account identifiers, and private marketplace tokens must never be committed.
 
+## Repository storage classes
+
+### Ordinary Git
+
+Ordinary Git stores source code, tests, documentation, manifests, checksums,
+provenance records, and small approved fixtures. Generated files must not be
+committed merely because a local build produced them. A committed manifest
+should identify the generation inputs and output digest without duplicating the
+output bytes when another storage class owns those bytes.
+
+### Git LFS
+
+Git LFS stores required, redistributable, non-text binary inputs or evidence
+that cannot be regenerated for a fresh checkout. LFS rules must be path-scoped
+to the approved asset family; global image or model globs are prohibited
+because they can migrate unrelated repository history. Git LFS must not be used
+as a dependency cache and does not replace provenance or redistribution
+approval.
+
+The current path-scoped LFS assets are:
+
+- `artifacts/debug/invalid-donor-overlay.blend`, retained by the GH-22 archive
+  contract;
+- canonical derived GLB inputs under `tools/juana_bust/assets/`.
+- canonical Juana V2 pixel runtime PNG files under
+  `packages/juana-pixel-runtime/v2/runtime/`.
+
+### Ignored local build roots
+
+`build/` contains downloaded toolchains, dependency caches, donor staging,
+intermediate geometry, and reproducible build outputs. `output/` contains local
+authoring packages and experiments. Both roots remain ignored and must be
+reconstructed from pinned scripts, manifests, source records, and checksums.
+Local brainstorm content, rejected captures, and test scratch directories use
+the same ignored-storage class.
+
+An ignored file is not automatically disposable. Ignore rules control Git
+delivery only; deletion requires a separate, explicit retention decision.
+
+### Release artifacts
+
+Versioned deliverables such as sealed pixel-runtime bundles, distributable VRM
+files, and review packages belong in an approved release or artifact store.
+The repository commits their build logic, provenance, manifest, and checksum.
+Publishing or replacing a release artifact is a separate approval-gated action
+and must not happen as a side effect of a normal source commit.
+
 ## Build enforcement
 
 The future asset catalog and build pipeline must reject releasable builds when:

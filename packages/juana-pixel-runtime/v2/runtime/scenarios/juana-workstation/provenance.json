@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "character_id": "juana",
+  "scenario_id": "juana-workstation",
+  "status": "approved_runtime_slice",
+  "approval": {
+    "approved_by": "Katherine E. Aguirre",
+    "approved_on": "2026-07-23",
+    "scope": "Scenario composition, seated neutral pose, and visual integration only."
+  },
+  "rights": {
+    "rights_holder": "Katherine E. Aguirre",
+    "authorship": "Original creative direction and prompts by Katherine E. Aguirre with ChatGPT-assisted image generation.",
+    "license": "Proprietary - all rights reserved",
+    "commercial_use": true,
+    "modification_allowed": true,
+    "redistribution_allowed": true,
+    "attestation": "Rights and source statements were supplied by the rights holder and were not independently audited."
+  },
+  "likeness": {
+    "subject": "Katherine E. Aguirre",
+    "relationship": "Juana is inspired by the rights holder's own likeness.",
+    "self_consent": true
+  },
+  "generation": {
+    "provider": "OpenAI",
+    "product": "ChatGPT image generation",
+    "model": "Not recorded by the interactive generator",
+    "method": "Iterative user-directed concept generation and visual approval."
+  },
+  "direct_inputs": {
+    "workspace_photo": {
+      "path": ".codex-remote-attachments/019f8653-7bb0-73a0-a01f-75a74fd740f3/571e9b95-dac6-4c86-a75e-bee94bd71a07/1-Photo-1.jpg",
+      "role": "User-owned workstation layout reference",
+      "sha256": "ca3dd789f9df6d09d79a520f0f797d5077e0eb66a47552cf5fd20dcf926d60e9",
+      "byte_length": 116108,
+      "width": 1280,
+      "height": 960
+    },
+    "scenario_one_reference": {
+      "path": "output/experiments/juana-baked-diorama-v1/juana-baked-diorama-approved.png",
+      "role": "Approved pixel-diorama style and integration reference",
+      "sha256": "15e45d57ffeb32cfc09e242c622d3ef862b7579c3195ffaf4dd2406f3047eda4",
+      "byte_length": 1954877,
+      "width": 1032,
+      "height": 1523
+    },
+    "juana_neutral_reference": {
+      "path": "output/authoring/juana-talking-bust-v2-pixel/review/panels/presence-states/presence-neutral.png",
+      "role": "Approved Juana identity and palette reference",
+      "sha256": "6111e3ed857c4986dc6502c41467061754dde5ebcf3c7999a7007f6430430090",
+      "byte_length": 33393,
+      "width": 512,
+      "height": 512
+    }
+  },
+  "approved_outputs": {
+    "empty_room": {
+      "path": "output/experiments/juana-scenario-2-workstation-v1/juana-scenario-2-environment-concept-v3-close.png",
+      "sha256": "07c32b9aa5f67c533b809683b2d56f21aec7afb3323249b041b1d1afc8462460",
+      "byte_length": 2691643,
+      "width": 1024,
+      "height": 1536
+    },
+    "seated_neutral": {
+      "path": "output/experiments/juana-scenario-2-workstation-v1/juana-scenario-2-seated-concept-v1.png",
+      "sha256": "0b1307e4fbbd7cab0469e6139409c73c213f0657cc46bc0b7a971df285dff110",
+      "byte_length": 2757150,
+      "width": 1024,
+      "height": 1536
+    }
+  },
+  "deferred": [
+    "Procedural arm and hand motion",
+    "Head tilting and face-touch gestures",
+    "Additional seated poses",
+    "Production UI integration"
+  ]
+}
