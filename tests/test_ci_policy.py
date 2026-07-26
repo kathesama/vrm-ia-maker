@@ -88,6 +88,21 @@ def test_node_job_gates_the_production_three_assembly_compiler() -> None:
     )
 
 
+def test_python_asset_validation_jobs_hydrate_git_lfs_objects() -> None:
+    jobs = _ci_jobs()
+
+    for job_name in ("test", "coverage"):
+        job = cast(dict[str, Any], jobs[job_name])
+        steps = cast(list[dict[str, Any]], job["steps"])
+        checkout = next(
+            step for step in steps if step.get("uses") == "actions/checkout@v4"
+        )
+
+        assert checkout.get("with", {}).get("lfs") is True, (
+            f"{job_name} must hydrate Git LFS objects before asset integrity tests"
+        )
+
+
 def test_modular_workflow_retains_spike_and_validates_both_production_variants() -> None:
     job = _modular_workflow_job()
 
